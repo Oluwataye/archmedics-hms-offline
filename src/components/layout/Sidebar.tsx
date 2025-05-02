@@ -17,6 +17,14 @@ import {
   Users
 } from 'lucide-react';
 
+// Add type for navigation items with optional children
+interface NavItem {
+  name: string;
+  icon: React.ReactNode;
+  path: string;
+  children?: { name: string; path: string }[];
+}
+
 const Sidebar = () => {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -29,7 +37,7 @@ const Sidebar = () => {
   };
 
   // Navigation items based on user role
-  const navigationItems = {
+  const navigationItems: Record<UserRole, NavItem[]> = {
     admin: [
       { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
       { 
