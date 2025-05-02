@@ -19,6 +19,12 @@ import DoctorDashboardPage from "@/pages/doctor/DoctorDashboardPage";
 import AppointmentsPage from "@/pages/doctor/AppointmentsPage";
 import PatientsPage from "@/pages/doctor/PatientsPage";
 
+// Nurse Pages
+import NurseDashboard from "@/pages/nurse/NurseDashboard";
+import NursePatientsPage from "@/pages/nurse/PatientsPage";
+import VitalsPage from "@/pages/nurse/VitalsPage";
+import MedicationPage from "@/pages/nurse/MedicationPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -46,7 +52,10 @@ const App = () => (
               <Route path="/prescriptions" element={<h1>Prescriptions Page</h1>} />
               
               {/* Nurse routes */}
-              <Route path="/vitals" element={<h1>Vitals Page</h1>} />
+              <Route path="/nurse" element={<NurseDashboard />} />
+              <Route path="/nurse/patients" element={<NursePatientsPage />} />
+              <Route path="/nurse/vitals" element={<VitalsPage />} />
+              <Route path="/nurse/medication" element={<MedicationPage />} />
               
               {/* Pharmacy routes */}
               <Route path="/pharmacy/inventory" element={<h1>Pharmacy Inventory Page</h1>} />
