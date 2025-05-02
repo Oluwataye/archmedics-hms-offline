@@ -22,7 +22,11 @@ import {
   Activity,
   AlertTriangle,
   MessageSquare,
-  ClipboardList
+  ClipboardList,
+  Package,
+  ShoppingCart,
+  PlusCircle,
+  BarChart3
 } from 'lucide-react';
 
 // Add type for navigation items with optional children
@@ -80,16 +84,20 @@ const Sidebar = () => {
       { name: 'Communication', icon: <MessageSquare size={20} />, path: '/nurse/communication' },
     ],
     pharmacist: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard', isActive: true },
-      { name: 'Inventory', icon: <Pill size={20} />, path: '/pharmacy/inventory' },
-      { name: 'Dispensary', icon: <FilePlus size={20} />, path: '/pharmacy/dispensary' },
+      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/pharmacy', isActive: true },
+      { name: 'Prescriptions', icon: <FileText size={20} />, path: '/pharmacy/prescriptions' },
+      { name: 'Drug Inventory', icon: <Package size={20} />, path: '/pharmacy/inventory' },
+      { name: 'Dispensary', icon: <PlusCircle size={20} />, path: '/pharmacy/dispensary' },
+      { name: 'Interactions & Alerts', icon: <AlertTriangle size={20} />, path: '/pharmacy/alerts' },
+      { name: 'Purchase Orders', icon: <ShoppingCart size={20} />, path: '/pharmacy/orders' },
       { name: 'Sales', icon: <CreditCard size={20} />, path: '/pharmacy/sales' },
+      { name: 'Reports', icon: <BarChart3 size={20} />, path: '/pharmacy/reports' },
     ],
     labtech: [
       { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard', isActive: true },
       { name: 'Test Requests', icon: <FilePlus size={20} />, path: '/lab/requests' },
       { name: 'Results', icon: <TestTube size={20} />, path: '/lab/results' },
-      { name: 'Inventory', icon: <Pill size={20} />, path: '/lab/inventory' },
+      { name: 'Inventory', icon: <Package size={20} />, path: '/lab/inventory' },
     ],
     cashier: [
       { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard', isActive: true },

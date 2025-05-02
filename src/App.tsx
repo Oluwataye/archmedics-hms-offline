@@ -25,6 +25,13 @@ import NursePatientsPage from "@/pages/nurse/PatientsPage";
 import VitalsPage from "@/pages/nurse/VitalsPage";
 import MedicationPage from "@/pages/nurse/MedicationPage";
 
+// Pharmacy Pages
+import PharmacistDashboard from "@/pages/pharmacy/PharmacistDashboard";
+import PrescriptionsPage from "@/pages/pharmacy/PrescriptionsPage";
+import InventoryPage from "@/pages/pharmacy/InventoryPage";
+import DispensaryPage from "@/pages/pharmacy/DispensaryPage";
+import AlertsPage from "@/pages/pharmacy/AlertsPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -56,11 +63,20 @@ const App = () => (
               <Route path="/nurse/patients" element={<NursePatientsPage />} />
               <Route path="/nurse/vitals" element={<VitalsPage />} />
               <Route path="/nurse/medication" element={<MedicationPage />} />
+              <Route path="/nurse/tasks" element={<h1>Nurse Tasks Page</h1>} />
+              <Route path="/nurse/wards" element={<h1>Nurse Wards Page</h1>} />
+              <Route path="/nurse/alerts" element={<h1>Nurse Alerts Page</h1>} />
+              <Route path="/nurse/communication" element={<h1>Nurse Communication Page</h1>} />
               
               {/* Pharmacy routes */}
-              <Route path="/pharmacy/inventory" element={<h1>Pharmacy Inventory Page</h1>} />
-              <Route path="/pharmacy/dispensary" element={<h1>Dispensary Page</h1>} />
+              <Route path="/pharmacy" element={<PharmacistDashboard />} />
+              <Route path="/pharmacy/prescriptions" element={<PrescriptionsPage />} />
+              <Route path="/pharmacy/inventory" element={<InventoryPage />} />
+              <Route path="/pharmacy/dispensary" element={<DispensaryPage />} />
+              <Route path="/pharmacy/alerts" element={<AlertsPage />} />
               <Route path="/pharmacy/sales" element={<h1>Pharmacy Sales Page</h1>} />
+              <Route path="/pharmacy/orders" element={<h1>Purchase Orders Page</h1>} />
+              <Route path="/pharmacy/reports" element={<h1>Pharmacy Reports Page</h1>} />
               
               {/* Lab routes */}
               <Route path="/lab/requests" element={<h1>Lab Requests Page</h1>} />
