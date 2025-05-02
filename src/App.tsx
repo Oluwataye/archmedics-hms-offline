@@ -15,6 +15,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import NotFound from "@/pages/NotFound";
 
 // Doctor Pages
+import DoctorDashboardPage from "@/pages/doctor/DoctorDashboardPage";
 import AppointmentsPage from "@/pages/doctor/AppointmentsPage";
 import PatientsPage from "@/pages/doctor/PatientsPage";
 
@@ -34,7 +35,9 @@ const App = () => (
             {/* Protected routes */}
             <Route path="/" element={<AppLayout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
+              
+              {/* Dynamic dashboard based on role */}
+              <Route path="/dashboard" element={<DoctorDashboardPage />} />
               
               {/* Doctor routes */}
               <Route path="/appointments" element={<AppointmentsPage />} />

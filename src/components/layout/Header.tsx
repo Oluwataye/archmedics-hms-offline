@@ -18,34 +18,49 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const { user, logout } = useAuth();
+  
+  // Get current date and time formatted
+  const currentDate = new Date().toLocaleDateString('en-US', { 
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+  
+  const currentTime = new Date().toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit'
+  });
 
   return (
-    <header className="bg-white border-b border-gray-200 py-3 px-6 flex items-center justify-between">
+    <header className="bg-white border-b border-gray-200 h-20 py-3 px-6 flex items-center justify-between">
       <div className="flex items-center">
         <Button variant="ghost" size="icon" className="md:hidden mr-2" onClick={toggleSidebar}>
           <Menu className="h-5 w-5" />
         </Button>
-        <h2 className="text-lg font-medium">ARCHMEDICS HMS</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
       </div>
       
-      <div className="flex items-center space-x-3">
-        <Button variant="ghost" size="icon">
-          <Bell className="h-5 w-5" />
-        </Button>
+      <div className="flex items-center space-x-4">
+        <span className="text-gray-500">{currentDate} | {currentTime}</span>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative rounded-full h-9 w-9 p-0">
+            <div className="flex items-center cursor-pointer">
+              <span className="mr-2 text-gray-700 hidden md:inline-block">
+                {user?.role === 'doctor' ? `Dr. ${user?.name}` : user?.name}
+              </span>
               {user?.avatar ? (
                 <img 
                   src={user.avatar} 
                   alt={user?.name} 
-                  className="rounded-full object-cover h-full w-full"
+                  className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
-                <User className="h-5 w-5" />
+                <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
+                  <User className="h-6 w-6 text-gray-500" />
+                </div>
               )}
-            </Button>
+            </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
