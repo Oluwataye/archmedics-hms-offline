@@ -70,9 +70,9 @@ const MOCK_USERS = [
   },
   {
     id: '6',
-    name: 'Cashier Alice Brown',
+    name: 'Alice Brown',
     email: 'cashier@archmedics.com',
-    password: 'cash123',
+    password: 'cashier123',
     role: 'cashier',
     avatar: '/avatars/cashier.jpg'
   },

@@ -26,7 +26,13 @@ const LoginPage = () => {
     
     try {
       await login(email, password);
-      navigate('/dashboard');
+      
+      // Redirect based on role
+      if (email === 'cashier@archmedics.com') {
+        navigate('/cashier');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       console.error('Login error:', error);
     } finally {
@@ -61,7 +67,7 @@ const LoginPage = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="doctor@archmedics.com"
+                  placeholder="cashier@archmedics.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -89,11 +95,12 @@ const LoginPage = () => {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex justify-center text-sm text-gray-500">
+          <CardFooter className="flex flex-col justify-center text-sm text-gray-500">
             <div>
               Demo Accounts:<br />
               doctor@archmedics.com / doctor123<br />
-              nurse@archmedics.com / nurse123
+              nurse@archmedics.com / nurse123<br />
+              cashier@archmedics.com / cashier123
             </div>
           </CardFooter>
         </Card>

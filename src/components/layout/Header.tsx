@@ -49,7 +49,16 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   };
 
   // Check if current user is cashier and on cashier dashboard
-  const showCashierTotal = user?.role === 'cashier' && location.pathname === '/cashier';
+  const showCashierTotal = user?.role === 'cashier' && location.pathname.includes('/cashier');
+
+  // Dynamic total based on page
+  const getCashierTotal = () => {
+    // In a real app, this would be fetched from state or context
+    if (location.pathname === '/cashier') return "$149.50";
+    if (location.pathname === '/cashier/reports') return "$3,450.75"; 
+    if (location.pathname === '/cashier/refunds') return "$0.00";
+    return "$149.50"; // Default
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 h-20 py-3 px-6 flex items-center justify-between">
@@ -64,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         {/* Show current transaction total for cashiers */}
         {showCashierTotal && (
           <div className="h-10 px-4 bg-blue-50 border border-blue-200 rounded flex items-center mr-6">
-            <span className="text-gray-800 font-bold text-sm">Total: $149.50</span>
+            <span className="text-gray-800 font-bold text-sm">Total: {getCashierTotal()}</span>
           </div>
         )}
       
