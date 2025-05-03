@@ -3,5 +3,5 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Create root without any additional wrappers
+// Create root without wrapping App in StrictMode again (since it's already in App.tsx)
 createRoot(document.getElementById("root")!).render(<App />);

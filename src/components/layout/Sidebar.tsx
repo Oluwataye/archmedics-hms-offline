@@ -26,7 +26,9 @@ import {
   Package,
   ShoppingCart,
   PlusCircle,
-  BarChart3
+  BarChart3,
+  RefreshCw,
+  ArrowRight
 } from 'lucide-react';
 
 // Add type for navigation items with optional children
@@ -100,10 +102,12 @@ const Sidebar = () => {
       { name: 'Inventory', icon: <Package size={20} />, path: '/lab/inventory' },
     ],
     cashier: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard', isActive: true },
+      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/cashier', isActive: true },
+      { name: 'Reports', icon: <FileText size={20} />, path: '/cashier/reports' },
+      { name: 'Receipt Reprint', icon: <RefreshCw size={20} />, path: '/cashier/reprint' },
+      { name: 'Refunds', icon: <ArrowRight size={20} />, path: '/cashier/refunds' },
       { name: 'Billing', icon: <CreditCard size={20} />, path: '/billing' },
       { name: 'Payments', icon: <CreditCard size={20} />, path: '/payments' },
-      { name: 'Reports', icon: <FileText size={20} />, path: '/reports' },
     ],
     ehr: [
       { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard', isActive: true },

@@ -33,6 +33,12 @@ import InventoryPage from "@/pages/pharmacy/InventoryPage";
 import DispensaryPage from "@/pages/pharmacy/DispensaryPage";
 import AlertsPage from "@/pages/pharmacy/AlertsPage";
 
+// Cashier Pages
+import CashierDashboard from "@/pages/cashier/CashierDashboard";
+import ReportsPage from "@/pages/cashier/ReportsPage";
+import ReprintPage from "@/pages/cashier/ReprintPage";
+import RefundsPage from "@/pages/cashier/RefundsPage";
+
 // Create a new QueryClient instance in a more stable way
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,79 +51,83 @@ const queryClient = new QueryClient({
 
 const App = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/login" element={<LoginPage />} />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<LoginPage />} />
+              
+              {/* Protected routes */}
+              <Route path="/" element={<AppLayout />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
                 
-                {/* Protected routes */}
-                <Route path="/" element={<AppLayout />}>
-                  <Route index element={<Navigate to="/dashboard" replace />} />
-                  
-                  {/* Dynamic dashboard based on role */}
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  
-                  {/* Doctor routes */}
-                  <Route path="/appointments" element={<AppointmentsPage />} />
-                  <Route path="/patients" element={<PatientsPage />} />
-                  <Route path="/consultations" element={<h1>Consultations Page</h1>} />
-                  <Route path="/prescriptions" element={<h1>Prescriptions Page</h1>} />
-                  
-                  {/* Nurse routes */}
-                  <Route path="/nurse" element={<NurseDashboard />} />
-                  <Route path="/nurse/patients" element={<NursePatientsPage />} />
-                  <Route path="/nurse/vitals" element={<VitalsPage />} />
-                  <Route path="/nurse/medication" element={<MedicationPage />} />
-                  <Route path="/nurse/tasks" element={<h1>Nurse Tasks Page</h1>} />
-                  <Route path="/nurse/wards" element={<h1>Nurse Wards Page</h1>} />
-                  <Route path="/nurse/alerts" element={<h1>Nurse Alerts Page</h1>} />
-                  <Route path="/nurse/communication" element={<h1>Nurse Communication Page</h1>} />
-                  
-                  {/* Pharmacy routes */}
-                  <Route path="/pharmacy" element={<PharmacistDashboard />} />
-                  <Route path="/pharmacy/prescriptions" element={<PrescriptionsPage />} />
-                  <Route path="/pharmacy/inventory" element={<InventoryPage />} />
-                  <Route path="/pharmacy/dispensary" element={<DispensaryPage />} />
-                  <Route path="/pharmacy/alerts" element={<AlertsPage />} />
-                  <Route path="/pharmacy/sales" element={<h1>Pharmacy Sales Page</h1>} />
-                  <Route path="/pharmacy/orders" element={<h1>Purchase Orders Page</h1>} />
-                  <Route path="/pharmacy/reports" element={<h1>Pharmacy Reports Page</h1>} />
-                  
-                  {/* Lab routes */}
-                  <Route path="/lab/requests" element={<h1>Lab Requests Page</h1>} />
-                  <Route path="/lab/results" element={<h1>Lab Results Page</h1>} />
-                  <Route path="/lab/inventory" element={<h1>Lab Inventory Page</h1>} />
-                  
-                  {/* Billing routes */}
-                  <Route path="/billing" element={<h1>Billing Page</h1>} />
-                  <Route path="/payments" element={<h1>Payments Page</h1>} />
-                  
-                  {/* EHR routes */}
-                  <Route path="/records" element={<h1>Patient Records Page</h1>} />
-                  <Route path="/documents" element={<h1>Documents Page</h1>} />
-                  
-                  {/* Admin routes */}
-                  <Route path="/staff" element={<h1>Staff Management Page</h1>} />
-                  <Route path="/staff/roles" element={<h1>Roles & Permissions Page</h1>} />
-                  <Route path="/staff/schedule" element={<h1>Staff Schedule Page</h1>} />
-                  <Route path="/reports" element={<h1>Reports Page</h1>} />
-                  <Route path="/settings" element={<h1>Settings Page</h1>} />
-                </Route>
+                {/* Dynamic dashboard based on role */}
+                <Route path="/dashboard" element={<DashboardPage />} />
                 
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+                {/* Doctor routes */}
+                <Route path="/appointments" element={<AppointmentsPage />} />
+                <Route path="/patients" element={<PatientsPage />} />
+                <Route path="/consultations" element={<h1>Consultations Page</h1>} />
+                <Route path="/prescriptions" element={<h1>Prescriptions Page</h1>} />
+                
+                {/* Nurse routes */}
+                <Route path="/nurse" element={<NurseDashboard />} />
+                <Route path="/nurse/patients" element={<NursePatientsPage />} />
+                <Route path="/nurse/vitals" element={<VitalsPage />} />
+                <Route path="/nurse/medication" element={<MedicationPage />} />
+                <Route path="/nurse/tasks" element={<h1>Nurse Tasks Page</h1>} />
+                <Route path="/nurse/wards" element={<h1>Nurse Wards Page</h1>} />
+                <Route path="/nurse/alerts" element={<h1>Nurse Alerts Page</h1>} />
+                <Route path="/nurse/communication" element={<h1>Nurse Communication Page</h1>} />
+                
+                {/* Pharmacy routes */}
+                <Route path="/pharmacy" element={<PharmacistDashboard />} />
+                <Route path="/pharmacy/prescriptions" element={<PrescriptionsPage />} />
+                <Route path="/pharmacy/inventory" element={<InventoryPage />} />
+                <Route path="/pharmacy/dispensary" element={<DispensaryPage />} />
+                <Route path="/pharmacy/alerts" element={<AlertsPage />} />
+                <Route path="/pharmacy/sales" element={<h1>Pharmacy Sales Page</h1>} />
+                <Route path="/pharmacy/orders" element={<h1>Purchase Orders Page</h1>} />
+                <Route path="/pharmacy/reports" element={<h1>Pharmacy Reports Page</h1>} />
+                
+                {/* Cashier routes */}
+                <Route path="/cashier" element={<CashierDashboard />} />
+                <Route path="/cashier/reports" element={<ReportsPage />} />
+                <Route path="/cashier/reprint" element={<ReprintPage />} />
+                <Route path="/cashier/refunds" element={<RefundsPage />} />
+                
+                {/* Lab routes */}
+                <Route path="/lab/requests" element={<h1>Lab Requests Page</h1>} />
+                <Route path="/lab/results" element={<h1>Lab Results Page</h1>} />
+                <Route path="/lab/inventory" element={<h1>Lab Inventory Page</h1>} />
+                
+                {/* Billing routes */}
+                <Route path="/billing" element={<h1>Billing Page</h1>} />
+                <Route path="/payments" element={<h1>Payments Page</h1>} />
+                
+                {/* EHR routes */}
+                <Route path="/records" element={<h1>Patient Records Page</h1>} />
+                <Route path="/documents" element={<h1>Documents Page</h1>} />
+                
+                {/* Admin routes */}
+                <Route path="/staff" element={<h1>Staff Management Page</h1>} />
+                <Route path="/staff/roles" element={<h1>Roles & Permissions Page</h1>} />
+                <Route path="/staff/schedule" element={<h1>Staff Schedule Page</h1>} />
+                <Route path="/reports" element={<h1>Reports Page</h1>} />
+                <Route path="/settings" element={<h1>Settings Page</h1>} />
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 };
 
