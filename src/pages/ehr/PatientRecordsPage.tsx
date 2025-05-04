@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -210,7 +211,7 @@ const PatientRecordsPage = () => {
                 <ListFilter className="h-4 w-4" /> Procedures
               </TabsTrigger>
               <TabsTrigger value="allergies" className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" /> Allergies
+                <AlertTriangle className="h-4 w-4" /> Allergies
               </TabsTrigger>
               <TabsTrigger value="history" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" /> History
