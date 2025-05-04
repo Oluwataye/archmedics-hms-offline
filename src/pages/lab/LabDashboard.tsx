@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Flask, 
+  FlaskConical, 
   Clock, 
   CheckCircle, 
   AlertTriangle,
@@ -15,7 +14,7 @@ const LabDashboard = () => {
 
   // Statistics data - would come from API in a real application
   const stats = [
-    { title: "Today's Tests", value: 24, icon: <Flask className="h-5 w-5 text-blue-600" />, color: 'bg-blue-100' },
+    { title: "Today's Tests", value: 24, icon: <FlaskConical className="h-5 w-5 text-blue-600" />, color: 'bg-blue-100' },
     { title: "Pending Tests", value: 12, icon: <Clock className="h-5 w-5 text-yellow-600" />, color: 'bg-yellow-100' },
     { title: "Completed Today", value: 10, icon: <CheckCircle className="h-5 w-5 text-green-600" />, color: 'bg-green-100' },
     { title: "Critical Results", value: 2, icon: <AlertTriangle className="h-5 w-5 text-red-600" />, color: 'bg-red-100' }
@@ -27,7 +26,7 @@ const LabDashboard = () => {
       id: 1, 
       action: 'Completed CBC for Patient #P-10235', 
       time: '10 minutes ago',
-      icon: <Flask className="h-4 w-4 text-blue-600" />,
+      icon: <FlaskConical className="h-4 w-4 text-blue-600" />,
       iconBg: 'bg-blue-100'
     },
     { 

@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, AlertTriangle, Calendar, Tool } from 'lucide-react';
+import { Search, AlertTriangle, Calendar, Wrench } from 'lucide-react';
 import { toast } from "sonner";
 import {
   Select,
@@ -391,7 +390,7 @@ const EquipmentPage = () => {
                       size="sm" 
                       className="text-blue-600 hover:text-blue-900 mr-2 p-0"
                     >
-                      <Tool className="h-4 w-4 mr-1" />
+                      <Wrench className="h-4 w-4 mr-1" />
                       Record
                     </Button>
                     <Button 

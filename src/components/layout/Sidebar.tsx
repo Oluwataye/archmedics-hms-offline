@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
@@ -8,7 +7,7 @@ import {
   User, 
   FilePlus, 
   Pill, 
-  TestTube, 
+  FlaskConical, 
   FileText, 
   CreditCard, 
   Settings, 
@@ -29,7 +28,6 @@ import {
   BarChart3,
   RefreshCw,
   ArrowRight,
-  Flask,
   Boxes,
   ClipboardCheck,
   Microscope
@@ -101,7 +99,7 @@ const Sidebar = () => {
     ],
     labtech: [
       { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/lab', isActive: true },
-      { name: 'Test Requests', icon: <Flask size={20} />, path: '/lab/requests' },
+      { name: 'Test Requests', icon: <FlaskConical size={20} />, path: '/lab/requests' },
       { 
         name: 'Results', 
         icon: <FileText size={20} />, 
