@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,8 +104,8 @@ const patientRecords = [
 
 const PatientRecordsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [department, setDepartment] = useState('');
-  const [patientStatus, setPatientStatus] = useState('');
+  const [department, setDepartment] = useState('all');
+  const [patientStatus, setPatientStatus] = useState('all');
   const [selectedPatient, setSelectedPatient] = useState(patientsData[0]);
   const [recordType, setRecordType] = useState('');
   const [recordDate, setRecordDate] = useState('');
@@ -148,7 +147,7 @@ const PatientRecordsPage = () => {
 
       {/* Main Panel */}
       <Card>
-        {/* Search and Filter */}
+        {/* Filters and Search */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
@@ -167,7 +166,7 @@ const PatientRecordsPage = () => {
                     <SelectValue placeholder="All Departments" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Departments</SelectItem>
+                    <SelectItem value="all">All Departments</SelectItem>
                     <SelectItem value="cardiology">Cardiology</SelectItem>
                     <SelectItem value="neurology">Neurology</SelectItem>
                     <SelectItem value="pediatrics">Pediatrics</SelectItem>
@@ -179,7 +178,7 @@ const PatientRecordsPage = () => {
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Status</SelectItem>
+                    <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="discharged">Discharged</SelectItem>
                     <SelectItem value="follow-up">Follow-up</SelectItem>
