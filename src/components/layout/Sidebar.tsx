@@ -1,54 +1,9 @@
 
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  User, 
-  FilePlus, 
-  Pill, 
-  FlaskConical, 
-  FileText, 
-  CreditCard, 
-  Settings, 
-  ChevronDown, 
-  ChevronUp,
-  Users,
-  LogOut,
-  FileCheck,
-  Clock,
-  Search,
-  Activity,
-  AlertTriangle,
-  MessageSquare,
-  ClipboardList,
-  Package,
-  ShoppingCart,
-  PlusCircle,
-  BarChart3,
-  RefreshCw,
-  ArrowRight,
-  Boxes,
-  ClipboardCheck,
-  Microscope,
-  Heart,
-  Stethoscope,
-  XCircle,
-  BookMedical,
-  BarChart2,
-  NotebookPen,
-  TestTube
-} from 'lucide-react';
-
-// Add type for navigation items with optional children
-interface NavItem {
-  name: string;
-  icon: React.ReactNode;
-  path: string;
-  children?: { name: string; path: string }[];
-  isActive?: boolean;
-}
+import { LogOut } from 'lucide-react';
+import SidebarItem from './SidebarItem';
+import { getNavigationItems } from '@/navigation/navigationConfig';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
@@ -61,113 +16,7 @@ const Sidebar = () => {
     });
   };
 
-  // Navigation items based on user role
-  const navigationItems: Record<UserRole, NavItem[]> = {
-    admin: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard', isActive: true },
-      { 
-        name: 'Staff Management', 
-        icon: <Users size={20} />, 
-        path: '/staff', 
-        children: [
-          { name: 'All Staff', path: '/staff' },
-          { name: 'Roles & Permissions', path: '/staff/roles' },
-          { name: 'Schedule', path: '/staff/schedule' }
-        ]
-      },
-      { name: 'Reports', icon: <FileText size={20} />, path: '/reports' },
-      { name: 'Settings', icon: <Settings size={20} />, path: '/settings' },
-    ],
-    doctor: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard', isActive: true },
-      { name: 'Consultations', icon: <FilePlus size={20} />, path: '/consultations' },
-      { name: 'Seen Patients', icon: <FileCheck size={20} />, path: '/patients' },
-      { name: 'Appointments', icon: <Calendar size={20} />, path: '/appointments' },
-      { name: 'Prescriptions', icon: <Pill size={20} />, path: '/prescriptions' },
-    ],
-    nurse: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/nurse', isActive: true },
-      { name: 'Patients', icon: <User size={20} />, path: '/nurse/patients' },
-      { name: 'Vital Signs', icon: <Activity size={20} />, path: '/nurse/vitals' },
-      { name: 'Medication', icon: <Pill size={20} />, path: '/nurse/medication' },
-      { name: 'Tasks', icon: <ClipboardList size={20} />, path: '/nurse/tasks' },
-      { name: 'Wards', icon: <Users size={20} />, path: '/nurse/wards' },
-      { name: 'Alerts', icon: <AlertTriangle size={20} />, path: '/nurse/alerts' },
-      { name: 'Communication', icon: <MessageSquare size={20} />, path: '/nurse/communication' },
-    ],
-    pharmacist: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/pharmacy', isActive: true },
-      { name: 'Prescriptions', icon: <FileText size={20} />, path: '/pharmacy/prescriptions' },
-      { name: 'Drug Inventory', icon: <Package size={20} />, path: '/pharmacy/inventory' },
-      { name: 'Dispensary', icon: <PlusCircle size={20} />, path: '/pharmacy/dispensary' },
-      { name: 'Interactions & Alerts', icon: <AlertTriangle size={20} />, path: '/pharmacy/alerts' },
-      { name: 'Purchase Orders', icon: <ShoppingCart size={20} />, path: '/pharmacy/orders' },
-      { name: 'Sales', icon: <CreditCard size={20} />, path: '/pharmacy/sales' },
-      { name: 'Reports', icon: <BarChart3 size={20} />, path: '/pharmacy/reports' },
-    ],
-    labtech: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/lab', isActive: true },
-      { name: 'Test Requests', icon: <FlaskConical size={20} />, path: '/lab/requests' },
-      { 
-        name: 'Results', 
-        icon: <FileText size={20} />, 
-        path: '/lab/results', 
-        children: [
-          { name: 'Pending Results', path: '/lab/results/pending' },
-          { name: 'Completed Results', path: '/lab/results/completed' },
-          { name: 'Critical Results', path: '/lab/results/critical' },
-        ]
-      },
-      { name: 'Inventory', icon: <Boxes size={20} />, path: '/lab/inventory' },
-      { name: 'Quality Control', icon: <ClipboardCheck size={20} />, path: '/lab/quality' },
-      { name: 'Equipment', icon: <Microscope size={20} />, path: '/lab/equipment' },
-    ],
-    cashier: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/cashier', isActive: true },
-      { name: 'Reports', icon: <FileText size={20} />, path: '/cashier/reports' },
-      { name: 'Receipt Reprint', icon: <RefreshCw size={20} />, path: '/cashier/reprint' },
-      { name: 'Refunds', icon: <ArrowRight size={20} />, path: '/cashier/refunds' },
-      { name: 'Billing', icon: <CreditCard size={20} />, path: '/billing' },
-      { name: 'Payments', icon: <CreditCard size={20} />, path: '/payments' },
-    ],
-    ehr: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/ehr', isActive: true },
-      { name: 'Patient Records', icon: <FileText size={20} />, path: '/ehr/records' },
-      { name: 'Patient Management', icon: <User size={20} />, path: '/ehr/patients' },
-      { name: 'Appointments', icon: <Calendar size={20} />, path: '/ehr/appointments' },
-      { 
-        name: 'Clinical Notes', 
-        icon: <NotebookPen size={20} />, 
-        path: '/ehr/notes',
-        children: [
-          { name: 'Progress Notes', path: '/ehr/notes/progress' },
-          { name: 'SOAP Notes', path: '/ehr/notes/soap' },
-          { name: 'Discharge Notes', path: '/ehr/notes/discharge' },
-        ]
-      },
-      { name: 'Lab Results', icon: <TestTube size={20} />, path: '/ehr/lab-results' },
-      { name: 'Imaging', icon: <FileText size={20} />, path: '/ehr/imaging' },
-      { name: 'Medications', icon: <Pill size={20} />, path: '/ehr/medications' },
-      { 
-        name: 'Reports', 
-        icon: <BarChart2 size={20} />, 
-        path: '/ehr/analytics',
-        children: [
-          { name: 'Patient Statistics', path: '/ehr/analytics/statistics' },
-          { name: 'Disease Prevalence', path: '/ehr/analytics/disease' },
-          { name: 'Treatment Outcomes', path: '/ehr/analytics/outcomes' },
-        ]
-      },
-    ],
-  };
-
-  // Get navigation items for the current user role
-  const getNavItems = (role?: UserRole) => {
-    if (!role) return [];
-    return navigationItems[role] || [];
-  };
-
-  const navItems = getNavItems(user?.role as UserRole);
+  const navItems = getNavigationItems(user?.role as UserRole);
 
   return (
     <div className="bg-gray-800 text-white w-64 flex-shrink-0 h-screen overflow-y-auto hidden md:block">
@@ -181,58 +30,13 @@ const Sidebar = () => {
       
       <div className="flex-1 flex flex-col">
         <nav>
-          {navItems.map((item, index) => (
-            <div key={item.path}>
-              {item.children ? (
-                <div>
-                  <button
-                    onClick={() => toggleCollapse(item.name)}
-                    className="w-full flex items-center px-4 py-4 text-sm transition-colors hover:bg-gray-700"
-                  >
-                    <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center mr-3">
-                      {item.icon}
-                    </div>
-                    <span>{item.name}</span>
-                    <span className="ml-auto">
-                      {collapsed[item.name] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </span>
-                  </button>
-                  
-                  {collapsed[item.name] && (
-                    <div className="bg-gray-900/50 pl-12 pr-4">
-                      {item.children.map((child) => (
-                        <NavLink
-                          key={child.path}
-                          to={child.path}
-                          className={({ isActive }) => 
-                            `block py-2 text-sm ${
-                              isActive ? 'text-medical-primary font-medium' : 'text-gray-300'
-                            } hover:text-white transition-colors`
-                          }
-                        >
-                          {child.name}
-                        </NavLink>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) => {
-                    const activeClass = isActive || item.isActive 
-                      ? 'bg-medical-primary'
-                      : 'bg-gray-800 hover:bg-gray-700';
-                    return `h-16 ${activeClass} flex items-center px-4 transition-colors`;
-                  }}
-                >
-                  <div className={`w-8 h-8 ${item.isActive ? 'bg-blue-600' : 'bg-gray-700'} rounded-full flex items-center justify-center`}>
-                    {item.icon}
-                  </div>
-                  <span className="ml-6">{item.name}</span>
-                </NavLink>
-              )}
-            </div>
+          {navItems.map((item) => (
+            <SidebarItem 
+              key={item.path}
+              item={item}
+              isCollapsed={!!collapsed[item.name]}
+              toggleCollapse={toggleCollapse}
+            />
           ))}
           
           {/* Spacer */}
