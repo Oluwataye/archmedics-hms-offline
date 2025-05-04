@@ -1,461 +1,375 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  Search, 
-  FilterX,
-  Download,
-  FileText,
-  User,
-  Calendar,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  ChevronDown,
-  Eye,
-  Printer
+  AlertTriangle, 
+  Search 
 } from 'lucide-react';
-import { 
+import { toast } from "sonner";
+import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { toast } from "sonner";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
-// Sample test results data
-const testResults = [
-  {
-    id: 'LAB-10245',
-    patientId: 'P-10237',
-    patientName: 'John Smith',
-    testType: 'Complete Blood Count',
-    requestedBy: 'Dr. Sarah Johnson',
-    date: '2025-04-27',
-    time: '09:15 AM',
-    status: 'Completed',
-    priority: 'Routine',
-    results: [
-      { name: 'White Blood Cells', value: '7.8', unit: '10³/µL', reference: '4.5-11.0', flag: 'normal' },
-      { name: 'Red Blood Cells', value: '5.2', unit: '10⁶/µL', reference: '4.5-5.9', flag: 'normal' },
-      { name: 'Hemoglobin', value: '14.2', unit: 'g/dL', reference: '13.5-17.5', flag: 'normal' },
-      { name: 'Hematocrit', value: '42', unit: '%', reference: '41-50', flag: 'normal' },
-      { name: 'Platelets', value: '250', unit: '10³/µL', reference: '150-450', flag: 'normal' },
-    ]
-  },
-  {
-    id: 'LAB-10246',
-    patientId: 'P-10238',
-    patientName: 'Emily Davis',
-    testType: 'Lipid Profile',
-    requestedBy: 'Dr. Michael Brown',
-    date: '2025-04-27',
-    time: '09:30 AM',
-    status: 'Pending',
-    priority: 'Routine',
-    results: []
-  },
-  {
-    id: 'LAB-10247',
-    patientId: 'P-10239',
-    patientName: 'Robert Wilson',
-    testType: 'Troponin I',
-    requestedBy: 'Dr. Lisa Taylor',
-    date: '2025-04-27',
-    time: '09:45 AM',
-    status: 'Critical',
-    priority: 'STAT',
-    results: [
-      { name: 'Troponin I', value: '1.8', unit: 'ng/mL', reference: '0.00-0.04', flag: 'high' },
-    ]
-  },
-  {
-    id: 'LAB-10248',
-    patientId: 'P-10240',
-    patientName: 'Maria Garcia',
-    testType: 'Liver Function Test',
-    requestedBy: 'Dr. James Wilson',
-    date: '2025-04-27',
-    time: '10:00 AM',
-    status: 'Completed',
-    priority: 'Routine',
-    results: [
-      { name: 'ALT', value: '22', unit: 'U/L', reference: '7-56', flag: 'normal' },
-      { name: 'AST', value: '25', unit: 'U/L', reference: '5-40', flag: 'normal' },
-      { name: 'ALP', value: '68', unit: 'U/L', reference: '44-147', flag: 'normal' },
-      { name: 'Total Bilirubin', value: '0.8', unit: 'mg/dL', reference: '0.1-1.2', flag: 'normal' },
-      { name: 'Albumin', value: '4.2', unit: 'g/dL', reference: '3.4-5.4', flag: 'normal' },
-    ]
-  },
-  {
-    id: 'LAB-10249',
-    patientId: 'P-10241',
-    patientName: 'Thomas Rodriguez',
-    testType: 'Blood Glucose',
-    requestedBy: 'Dr. Anna Martinez',
-    date: '2025-04-27',
-    time: '10:15 AM',
-    status: 'Completed',
-    priority: 'Routine',
-    results: [
-      { name: 'Fasting Glucose', value: '130', unit: 'mg/dL', reference: '70-100', flag: 'high' },
-    ]
-  },
-  {
-    id: 'LAB-10250',
-    patientId: 'P-10242',
-    patientName: 'Jennifer Lee',
-    testType: 'Thyroid Panel',
-    requestedBy: 'Dr. Robert Clark',
-    date: '2025-04-27',
-    time: '10:30 AM',
-    status: 'Pending',
-    priority: 'Routine',
-    results: []
-  }
-];
+const LabRequestsPage = () => {
+  // State for filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
 
-const LabResultsPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [testTypeFilter, setTestTypeFilter] = useState('');
-  const [expandedResult, setExpandedResult] = useState<string | null>(null);
-  
-  const filteredResults = testResults.filter(result => {
-    const matchSearch = 
-      result.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result.id.toLowerCase().includes(searchTerm.toLowerCase());
+  // Test requests data - would come from API in a real application
+  const allTestRequests = [
+    {
+      id: 'LAB-10245',
+      patient: 'John Smith (P-10237)',
+      testType: 'Complete Blood Count',
+      department: 'Internal Medicine',
+      requestedBy: 'Dr. Sarah Johnson',
+      time: '09:15 AM',
+      date: 'Apr 27, 2025',
+      priority: 'Routine',
+      priorityColor: 'bg-yellow-100 text-yellow-800',
+      status: 'Pending',
+      statusClass: 'bg-yellow-100 text-yellow-800',
+      notes: 'Patient has reported fatigue and weakness',
+      specimenType: 'Blood',
+      specimenCollected: true,
+      collectedAt: 'Apr 27, 2025, 08:45 AM',
+      collectedBy: 'Nurse Emma Davis'
+    },
+    {
+      id: 'LAB-10246',
+      patient: 'Emily Davis (P-10238)',
+      testType: 'Lipid Profile',
+      department: 'Cardiology',
+      requestedBy: 'Dr. Michael Brown',
+      time: '09:30 AM',
+      date: 'Apr 27, 2025',
+      priority: 'Routine',
+      priorityColor: 'bg-yellow-100 text-yellow-800',
+      status: 'In Progress',
+      statusClass: 'bg-blue-100 text-blue-800',
+      notes: 'Annual checkup',
+      specimenType: 'Blood',
+      specimenCollected: true,
+      collectedAt: 'Apr 27, 2025, 09:00 AM',
+      collectedBy: 'Nurse Robert Johnson'
+    },
+    {
+      id: 'LAB-10247',
+      patient: 'Robert Wilson (P-10239)',
+      testType: 'Troponin I',
+      department: 'Emergency',
+      requestedBy: 'Dr. Lisa Taylor',
+      time: '09:45 AM',
+      date: 'Apr 27, 2025',
+      priority: 'STAT',
+      priorityColor: 'bg-red-100 text-red-800',
+      status: 'Critical',
+      statusClass: 'bg-red-100 text-red-800',
+      notes: 'Patient with severe chest pain',
+      specimenType: 'Blood',
+      specimenCollected: true,
+      collectedAt: 'Apr 27, 2025, 09:30 AM',
+      collectedBy: 'Nurse William Chen'
+    },
+    {
+      id: 'LAB-10248',
+      patient: 'Maria Garcia (P-10240)',
+      testType: 'Liver Function Test',
+      department: 'Gastroenterology',
+      requestedBy: 'Dr. James Wilson',
+      time: '10:00 AM',
+      date: 'Apr 27, 2025',
+      priority: 'Routine',
+      priorityColor: 'bg-yellow-100 text-yellow-800',
+      status: 'Completed',
+      statusClass: 'bg-green-100 text-green-800',
+      notes: 'Follow-up for medication adjustment',
+      specimenType: 'Blood',
+      specimenCollected: true,
+      collectedAt: 'Apr 27, 2025, 09:45 AM',
+      collectedBy: 'Nurse Emma Davis'
+    },
+    {
+      id: 'LAB-10249',
+      patient: 'David Lee (P-10241)',
+      testType: 'Urinalysis',
+      department: 'Nephrology',
+      requestedBy: 'Dr. Anna Martinez',
+      time: '10:15 AM',
+      date: 'Apr 27, 2025',
+      priority: 'Routine',
+      priorityColor: 'bg-yellow-100 text-yellow-800',
+      status: 'Pending',
+      statusClass: 'bg-yellow-100 text-yellow-800',
+      notes: 'Suspected UTI',
+      specimenType: 'Urine',
+      specimenCollected: false,
+      collectedAt: '',
+      collectedBy: ''
+    },
+    {
+      id: 'LAB-10250',
+      patient: 'Jennifer Adams (P-10242)',
+      testType: 'Thyroid Panel',
+      department: 'Endocrinology',
+      requestedBy: 'Dr. Robert Kim',
+      time: '10:30 AM',
+      date: 'Apr 27, 2025',
+      priority: 'Urgent',
+      priorityColor: 'bg-orange-100 text-orange-800',
+      status: 'Pending',
+      statusClass: 'bg-yellow-100 text-yellow-800',
+      notes: 'Patient with symptoms of hypothyroidism',
+      specimenType: 'Blood',
+      specimenCollected: true,
+      collectedAt: 'Apr 27, 2025, 10:15 AM',
+      collectedBy: 'Nurse Robert Johnson'
+    }
+  ];
+
+  // Filter test requests based on search query and filters
+  const filteredTestRequests = allTestRequests.filter(request => {
+    // Search filter
+    const searchMatch = searchQuery === '' || 
+      request.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.testType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.requestedBy.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchStatus = statusFilter ? result.status === statusFilter : true;
-    const matchTestType = testTypeFilter ? result.testType === testTypeFilter : true;
+    // Status filter
+    const statusMatch = statusFilter === 'all' || 
+      request.status.toLowerCase() === statusFilter.toLowerCase();
     
-    return matchSearch && matchStatus && matchTestType;
+    // Priority filter
+    const priorityMatch = priorityFilter === 'all' || 
+      request.priority.toLowerCase() === priorityFilter.toLowerCase();
+    
+    return searchMatch && statusMatch && priorityMatch;
   });
 
-  // Clear all filters
-  const clearFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('');
-    setTestTypeFilter('');
+  // Handle process test button
+  const handleProcessTest = (testId: string) => {
+    toast.success(`Started processing test ${testId}`);
   };
 
-  // Handle view result detail
-  const handleViewResult = (id: string) => {
-    if (expandedResult === id) {
-      setExpandedResult(null);
-    } else {
-      setExpandedResult(id);
-    }
+  // Handle view details button
+  const handleViewDetails = (testId: string) => {
+    toast.info(`Viewing details for test ${testId}`);
   };
 
-  // Handle print result
-  const handlePrintResult = (id: string) => {
-    toast.info(`Printing lab result ${id}`);
+  // Handle complete test button
+  const handleCompleteTest = (testId: string) => {
+    toast.success(`Test ${testId} marked as completed`);
   };
 
-  // Handle download result
-  const handleDownloadResult = (id: string) => {
-    toast.success(`Lab result ${id} downloaded successfully`);
+  // Handle verify test button
+  const handleVerifyTest = (testId: string) => {
+    toast.success(`Test ${testId} has been verified`);
   };
 
-  // Get status badge color
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'Completed':
-        return {
-          color: 'bg-green-100 text-green-800',
-          icon: <CheckCircle className="h-3 w-3 mr-1" />
-        };
-      case 'Pending':
-        return {
-          color: 'bg-yellow-100 text-yellow-800',
-          icon: <Clock className="h-3 w-3 mr-1" />
-        };
-      case 'Critical':
-        return {
-          color: 'bg-red-100 text-red-800',
-          icon: <AlertTriangle className="h-3 w-3 mr-1" />
-        };
-      default:
-        return {
-          color: 'bg-gray-100 text-gray-800',
-          icon: null
-        };
-    }
-  };
-
-  // Get priority badge color
-  const getPriorityBadge = (priority: string) => {
-    switch(priority) {
-      case 'STAT':
-        return 'bg-red-100 text-red-800';
-      case 'Urgent':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-blue-100 text-blue-800';
-    }
-  };
-
-  // Get flag color for test results
-  const getFlagColor = (flag: string) => {
-    switch(flag) {
-      case 'high':
-        return 'text-red-500';
-      case 'low':
-        return 'text-blue-500';
-      default:
-        return 'text-gray-900';
-    }
+  // Handle adding a new test request
+  const handleAddNewTest = () => {
+    toast.info("Creating a new test request");
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Lab Results</h1>
-          <div className="text-sm text-gray-500 flex items-center mt-1">
-            <span>Health Records</span>
-            <span className="mx-2">›</span>
-            <span className="text-blue-500">Lab Results</span>
-          </div>
-        </div>
-        <div>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={() => toast.info("Import lab results functionality would go here")}
-          >
-            <Download className="h-4 w-4" />
-            Import Results
-          </Button>
-        </div>
+    <div>
+      {/* Breadcrumbs */}
+      <div className="text-gray-500 text-sm mb-4">Laboratory &gt; Test Requests</div>
+      
+      {/* Page Header with Date */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Test Requests</h1>
       </div>
-
+      
       {/* Filters and Search */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+      <Card className="border border-gray-200 p-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-grow">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search by patient or ID..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by patient name, test ID or type..."
+                className="pl-9"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex gap-4 w-full md:w-auto">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-40">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={testTypeFilter} onValueChange={setTestTypeFilter}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Test Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Test Types</SelectItem>
-                  <SelectItem value="Complete Blood Count">Complete Blood Count</SelectItem>
-                  <SelectItem value="Lipid Profile">Lipid Profile</SelectItem>
-                  <SelectItem value="Liver Function Test">Liver Function Test</SelectItem>
-                  <SelectItem value="Blood Glucose">Blood Glucose</SelectItem>
-                  <SelectItem value="Troponin I">Troponin I</SelectItem>
-                  <SelectItem value="Thyroid Panel">Thyroid Panel</SelectItem>
-                </SelectContent>
-              </Select>
-              {(searchTerm || statusFilter || testTypeFilter) && (
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  title="Clear filters"
-                  onClick={clearFilters}
-                >
-                  <FilterX className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
           </div>
-
-          {/* Lab Results Table */}
-          <div className="mt-6">
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Patient</TableHead>
-                    <TableHead>Test Type</TableHead>
-                    <TableHead>Ordered By</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredResults.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
-                        No lab results found matching your criteria.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredResults.map((result) => (
-                      <React.Fragment key={result.id}>
-                        <TableRow className="hover:bg-gray-50">
-                          <TableCell className="font-medium">{result.id}</TableCell>
-                          <TableCell>
-                            <div className="font-medium">{result.patientName}</div>
-                            <div className="text-xs text-gray-500">{result.patientId}</div>
-                          </TableCell>
-                          <TableCell>{result.testType}</TableCell>
-                          <TableCell>{result.requestedBy}</TableCell>
-                          <TableCell>
-                            <div>{result.date}</div>
-                            <div className="text-xs text-gray-500">{result.time}</div>
-                          </TableCell>
-                          <TableCell>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityBadge(result.priority)}`}>
-                              {result.priority}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(result.status).color} flex items-center w-fit`}>
-                              {getStatusBadge(result.status).icon}
-                              {result.status}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end space-x-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() => handleViewResult(result.id)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() => handlePrintResult(result.id)}
-                              >
-                                <Printer className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() => handleDownloadResult(result.id)}
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        
-                        {/* Expanded Result View */}
-                        {expandedResult === result.id && (
-                          <TableRow>
-                            <TableCell colSpan={8} className="bg-gray-50 p-0">
-                              <div className="p-4">
-                                <div className="mb-4">
-                                  <h3 className="font-semibold text-gray-900">{result.testType} Results</h3>
-                                  <div className="text-sm text-gray-500">Patient: {result.patientName} ({result.patientId})</div>
-                                </div>
-                                
-                                {result.status === 'Pending' ? (
-                                  <div className="text-yellow-600 italic">Results pending - test in progress</div>
-                                ) : (
-                                  <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                      <thead className="bg-gray-100">
-                                        <tr>
-                                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Test</th>
-                                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Result</th>
-                                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit</th>
-                                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Reference Range</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-gray-200">
-                                        {result.results.map((item, idx) => (
-                                          <tr key={idx}>
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{item.name}</td>
-                                            <td className={`px-4 py-2 whitespace-nowrap text-sm font-semibold ${getFlagColor(item.flag)}`}>{item.value}</td>
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{item.unit}</td>
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{item.reference}</td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                )}
-                                <div className="mt-4 text-right">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleViewResult(result.id)}
-                                  >
-                                    Close Details
-                                  </Button>
-                                </div>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </React.Fragment>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            {filteredResults.length > 0 && (
-              <div className="flex justify-between items-center mt-4 text-sm">
-                <div className="text-gray-500">
-                  Showing <span className="font-medium">1</span> to{" "}
-                  <span className="font-medium">{filteredResults.length}</span> of{" "}
-                  <span className="font-medium">{filteredResults.length}</span> results
-                </div>
-                <div className="flex space-x-1">
-                  <Button variant="outline" size="sm" disabled>Previous</Button>
-                  <Button variant="outline" size="sm" className="bg-blue-50 border-blue-200">1</Button>
-                  <Button variant="outline" size="sm" disabled>Next</Button>
-                </div>
-              </div>
-            )}
+          
+          <div className="md:w-1/6">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Filter by Status</SelectLabel>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
+          
+          <div className="md:w-1/6">
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Filter by Priority</SelectLabel>
+                  <SelectItem value="all">All Priorities</SelectItem>
+                  <SelectItem value="routine">Routine</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="stat">STAT</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Button 
+            onClick={handleAddNewTest} 
+            className="md:w-auto"
+            style={{ backgroundColor: '#3B82F6' }}
+          >
+            New Test Request
+          </Button>
+        </div>
       </Card>
+      
+      {/* Test Requests List */}
+      <Card className="border border-gray-200 mb-6">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test ID</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test Type</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested By</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date/Time</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredTestRequests.map((request) => (
+                <tr key={request.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{request.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{request.patient}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{request.testType}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{request.requestedBy}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {request.date}, {request.time}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${request.priorityColor}`}>
+                      {request.priority}
+                    </span>
+                    {request.priority === 'STAT' && (
+                      <span className="ml-1">
+                        <AlertTriangle className="h-4 w-4 text-red-500 inline" />
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${request.statusClass}`}>
+                      {request.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {request.status === 'Pending' && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-blue-600 hover:text-blue-900 mr-2 p-0"
+                        onClick={() => handleProcessTest(request.id)}
+                      >
+                        Process
+                      </Button>
+                    )}
+                    {request.status === 'In Progress' && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-blue-600 hover:text-blue-900 mr-2 p-0"
+                        onClick={() => handleCompleteTest(request.id)}
+                      >
+                        Complete
+                      </Button>
+                    )}
+                    {request.status === 'Critical' && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-blue-600 hover:text-blue-900 mr-2 p-0"
+                        onClick={() => handleVerifyTest(request.id)}
+                      >
+                        Verify
+                      </Button>
+                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-gray-600 hover:text-gray-900 p-0"
+                      onClick={() => handleViewDetails(request.id)}
+                    >
+                      Details
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Empty state if no results */}
+        {filteredTestRequests.length === 0 && (
+          <div className="py-8 text-center text-gray-500">
+            <p>No test requests found matching your criteria.</p>
+          </div>
+        )}
+        
+        {/* Pagination */}
+        {filteredTestRequests.length > 0 && (
+          <div className="flex items-center justify-between p-4">
+            <div className="text-sm text-gray-500">
+              Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredTestRequests.length}</span> of{" "}
+              <span className="font-medium">{filteredTestRequests.length}</span> results
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm" className="text-sm" disabled>Previous</Button>
+              <Button variant="default" size="sm" className="text-sm bg-blue-500">1</Button>
+              <Button variant="outline" size="sm" className="text-sm" disabled>Next</Button>
+            </div>
+          </div>
+        )}
+      </Card>
+      
+      {/* Floating Action Button */}
+      <Button 
+        className="fixed bottom-8 right-8 w-14 h-14 rounded-full shadow-lg"
+        style={{ backgroundColor: '#3B82F6' }}
+        onClick={handleAddNewTest}
+      >
+        <span className="text-xl font-bold">+</span>
+      </Button>
     </div>
   );
 };
 
-export default LabResultsPage;
+export default LabRequestsPage;
