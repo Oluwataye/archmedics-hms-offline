@@ -35,7 +35,7 @@ import {
 
 const PatientStatisticsPage = () => {
   const [timeRange, setTimeRange] = useState('month');
-  const [department, setDepartment] = useState('');
+  const [department, setDepartment] = useState('all');
 
   // Sample data for charts
   const patientAdmissionsData = [
@@ -126,7 +126,7 @@ const PatientStatisticsPage = () => {
               <SelectValue placeholder="All Departments" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Departments</SelectItem>
+              <SelectItem value="all">All Departments</SelectItem>
               <SelectItem value="cardiology">Cardiology</SelectItem>
               <SelectItem value="neurology">Neurology</SelectItem>
               <SelectItem value="pediatrics">Pediatrics</SelectItem>
