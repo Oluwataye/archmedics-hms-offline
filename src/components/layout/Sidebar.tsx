@@ -28,7 +28,11 @@ import {
   PlusCircle,
   BarChart3,
   RefreshCw,
-  ArrowRight
+  ArrowRight,
+  Flask,
+  Boxes,
+  ClipboardCheck,
+  Microscope
 } from 'lucide-react';
 
 // Add type for navigation items with optional children
@@ -96,10 +100,21 @@ const Sidebar = () => {
       { name: 'Reports', icon: <BarChart3 size={20} />, path: '/pharmacy/reports' },
     ],
     labtech: [
-      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard', isActive: true },
-      { name: 'Test Requests', icon: <FilePlus size={20} />, path: '/lab/requests' },
-      { name: 'Results', icon: <TestTube size={20} />, path: '/lab/results' },
-      { name: 'Inventory', icon: <Package size={20} />, path: '/lab/inventory' },
+      { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/lab', isActive: true },
+      { name: 'Test Requests', icon: <Flask size={20} />, path: '/lab/requests' },
+      { 
+        name: 'Results', 
+        icon: <FileText size={20} />, 
+        path: '/lab/results', 
+        children: [
+          { name: 'Pending Results', path: '/lab/results/pending' },
+          { name: 'Completed Results', path: '/lab/results/completed' },
+          { name: 'Critical Results', path: '/lab/results/critical' },
+        ]
+      },
+      { name: 'Inventory', icon: <Boxes size={20} />, path: '/lab/inventory' },
+      { name: 'Quality Control', icon: <ClipboardCheck size={20} />, path: '/lab/quality' },
+      { name: 'Equipment', icon: <Microscope size={20} />, path: '/lab/equipment' },
     ],
     cashier: [
       { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/cashier', isActive: true },

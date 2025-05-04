@@ -44,12 +44,24 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     if (path === '/cashier/refunds') return 'Process Refunds';
     if (path === '/pharmacy') return 'Pharmacy Dashboard';
     if (path === '/nurse') return 'Nurse Dashboard';
+    if (path === '/lab') return 'Laboratory Dashboard';
+    if (path === '/lab/requests') return 'Test Requests';
+    if (path === '/lab/results') return 'Test Results';
+    if (path === '/lab/results/pending') return 'Pending Results';
+    if (path === '/lab/results/completed') return 'Completed Results';
+    if (path === '/lab/results/critical') return 'Critical Results';
+    if (path === '/lab/inventory') return 'Lab Inventory';
+    if (path === '/lab/quality') return 'Quality Control';
+    if (path === '/lab/equipment') return 'Lab Equipment';
     
     return 'Dashboard';
   };
 
   // Check if current user is cashier and on cashier dashboard
   const showCashierTotal = user?.role === 'cashier' && location.pathname.includes('/cashier');
+  
+  // Check if current user is lab tech and on lab pages
+  const showLabMetrics = user?.role === 'labtech' && location.pathname.includes('/lab');
 
   // Dynamic total based on page
   const getCashierTotal = () => {
@@ -58,6 +70,15 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     if (location.pathname === '/cashier/reports') return "$3,450.75"; 
     if (location.pathname === '/cashier/refunds') return "$0.00";
     return "$149.50"; // Default
+  };
+  
+  // Get lab metrics based on the page
+  const getPendingTestsCount = () => {
+    return "12"; // This would be dynamic in a real app
+  };
+  
+  const getCriticalResultsCount = () => {
+    return "2"; // This would be dynamic in a real app
   };
 
   return (
@@ -75,6 +96,18 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           <div className="h-10 px-4 bg-blue-50 border border-blue-200 rounded flex items-center mr-6">
             <span className="text-gray-800 font-bold text-sm">Total: {getCashierTotal()}</span>
           </div>
+        )}
+        
+        {/* Show lab metrics for lab techs */}
+        {showLabMetrics && (
+          <>
+            <div className="h-10 px-4 bg-blue-50 border border-blue-200 rounded flex items-center">
+              <span className="text-gray-800 font-bold text-sm">Pending Tests: <span className="text-blue-600">{getPendingTestsCount()}</span></span>
+            </div>
+            <div className="h-10 px-4 bg-red-50 border border-red-200 rounded flex items-center">
+              <span className="text-gray-800 font-bold text-sm">Critical Results: <span className="text-red-600">{getCriticalResultsCount()}</span></span>
+            </div>
+          </>
         )}
       
         <span className="text-gray-500">{currentDate} | {currentTime}</span>

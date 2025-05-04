@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import React from 'react'
 
-// Create root without wrapping App in StrictMode again (since it's already in App.tsx)
+// Create root and render App component
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />

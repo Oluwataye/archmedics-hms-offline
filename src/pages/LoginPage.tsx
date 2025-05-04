@@ -30,6 +30,8 @@ const LoginPage = () => {
       // Redirect based on role
       if (email === 'cashier@archmedics.com') {
         navigate('/cashier');
+      } else if (email === 'labtech@archmedics.com') {
+        navigate('/lab');
       } else {
         navigate('/dashboard');
       }
@@ -67,7 +69,7 @@ const LoginPage = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="cashier@archmedics.com"
+                  placeholder="labtech@archmedics.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -100,6 +102,7 @@ const LoginPage = () => {
               Demo Accounts:<br />
               doctor@archmedics.com / doctor123<br />
               nurse@archmedics.com / nurse123<br />
+              labtech@archmedics.com / lab123<br />
               cashier@archmedics.com / cashier123
             </div>
           </CardFooter>

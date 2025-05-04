@@ -39,6 +39,17 @@ import ReportsPage from "@/pages/cashier/ReportsPage";
 import ReprintPage from "@/pages/cashier/ReprintPage";
 import RefundsPage from "@/pages/cashier/RefundsPage";
 
+// Lab Technician Pages
+import LabDashboard from "@/pages/lab/LabDashboard";
+import LabRequestsPage from "@/pages/lab/LabRequestsPage";
+import ResultsPage from "@/pages/lab/ResultsPage";
+import PendingResultsPage from "@/pages/lab/PendingResultsPage";
+import CompletedResultsPage from "@/pages/lab/CompletedResultsPage";
+import CriticalResultsPage from "@/pages/lab/CriticalResultsPage";
+import LabInventoryPage from "@/pages/lab/InventoryPage";
+import QualityControlPage from "@/pages/lab/QualityControlPage";
+import EquipmentPage from "@/pages/lab/EquipmentPage";
+
 // Create a new QueryClient instance in a more stable way
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,9 +112,15 @@ const App = () => {
                 <Route path="/cashier/refunds" element={<RefundsPage />} />
                 
                 {/* Lab routes */}
-                <Route path="/lab/requests" element={<h1>Lab Requests Page</h1>} />
-                <Route path="/lab/results" element={<h1>Lab Results Page</h1>} />
-                <Route path="/lab/inventory" element={<h1>Lab Inventory Page</h1>} />
+                <Route path="/lab" element={<LabDashboard />} />
+                <Route path="/lab/requests" element={<LabRequestsPage />} />
+                <Route path="/lab/results" element={<ResultsPage />} />
+                <Route path="/lab/results/pending" element={<PendingResultsPage />} />
+                <Route path="/lab/results/completed" element={<CompletedResultsPage />} />
+                <Route path="/lab/results/critical" element={<CriticalResultsPage />} />
+                <Route path="/lab/inventory" element={<LabInventoryPage />} />
+                <Route path="/lab/quality" element={<QualityControlPage />} />
+                <Route path="/lab/equipment" element={<EquipmentPage />} />
                 
                 {/* Billing routes */}
                 <Route path="/billing" element={<h1>Billing Page</h1>} />
