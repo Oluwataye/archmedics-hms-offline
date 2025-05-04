@@ -15,7 +15,9 @@ import {
   Share2,
   Download,
   Eye,
-  PlusCircle
+  PlusCircle,
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
 import { 
   Select,
@@ -445,9 +447,5 @@ const PatientRecordsPage = () => {
     </div>
   );
 };
-
-// Missing components for the code to work
-const AlertCircle = (props: any) => <AlertTriangle {...props} />;
-const Clock = (props: any) => <Clock {...props} />;
 
 export default PatientRecordsPage;
