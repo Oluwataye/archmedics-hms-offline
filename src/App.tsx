@@ -50,6 +50,21 @@ import LabInventoryPage from "@/pages/lab/InventoryPage";
 import QualityControlPage from "@/pages/lab/QualityControlPage";
 import EquipmentPage from "@/pages/lab/EquipmentPage";
 
+// EHR Pages (Health Record Management)
+import EHRDashboard from "@/pages/ehr/EHRDashboard";
+import PatientRecordsPage from "@/pages/ehr/PatientRecordsPage";
+import PatientManagementPage from "@/pages/ehr/PatientManagementPage";
+import EHRAppointmentsPage from "@/pages/ehr/AppointmentsPage";
+import ProgressNotesPage from "@/pages/ehr/ProgressNotesPage";
+import SOAPNotesPage from "@/pages/ehr/SOAPNotesPage";
+import DischargeNotesPage from "@/pages/ehr/DischargeNotesPage";
+import LabResultsPage from "@/pages/ehr/LabResultsPage";
+import ImagingPage from "@/pages/ehr/ImagingPage";
+import MedicationsPage from "@/pages/ehr/MedicationsPage";
+import PatientStatisticsPage from "@/pages/ehr/PatientStatisticsPage";
+import DiseasePrevalencePage from "@/pages/ehr/DiseasePrevalencePage";
+import TreatmentOutcomesPage from "@/pages/ehr/TreatmentOutcomesPage";
+
 // Create a new QueryClient instance in a more stable way
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,13 +137,24 @@ const App = () => {
                 <Route path="/lab/quality" element={<QualityControlPage />} />
                 <Route path="/lab/equipment" element={<EquipmentPage />} />
                 
+                {/* Health Record Management (EHR) routes */}
+                <Route path="/ehr" element={<EHRDashboard />} />
+                <Route path="/ehr/records" element={<PatientRecordsPage />} />
+                <Route path="/ehr/patients" element={<PatientManagementPage />} />
+                <Route path="/ehr/appointments" element={<EHRAppointmentsPage />} />
+                <Route path="/ehr/notes/progress" element={<ProgressNotesPage />} />
+                <Route path="/ehr/notes/soap" element={<SOAPNotesPage />} />
+                <Route path="/ehr/notes/discharge" element={<DischargeNotesPage />} />
+                <Route path="/ehr/lab-results" element={<LabResultsPage />} />
+                <Route path="/ehr/imaging" element={<ImagingPage />} />
+                <Route path="/ehr/medications" element={<MedicationsPage />} />
+                <Route path="/ehr/analytics/statistics" element={<PatientStatisticsPage />} />
+                <Route path="/ehr/analytics/disease" element={<DiseasePrevalencePage />} />
+                <Route path="/ehr/analytics/outcomes" element={<TreatmentOutcomesPage />} />
+                
                 {/* Billing routes */}
                 <Route path="/billing" element={<h1>Billing Page</h1>} />
                 <Route path="/payments" element={<h1>Payments Page</h1>} />
-                
-                {/* EHR routes */}
-                <Route path="/records" element={<h1>Patient Records Page</h1>} />
-                <Route path="/documents" element={<h1>Documents Page</h1>} />
                 
                 {/* Admin routes */}
                 <Route path="/staff" element={<h1>Staff Management Page</h1>} />
