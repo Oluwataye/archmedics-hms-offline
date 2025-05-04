@@ -91,8 +91,10 @@ const DischargeNotesPage = () => {
                     <CardTitle className="text-lg">{note.patientName}</CardTitle>
                     <CardDescription>{note.doctor}</CardDescription>
                   </div>
-                  <Badge variant={note.status === "Completed" ? "success" : "secondary"} 
-                         className={note.status === "Completed" ? "bg-green-100 text-green-800" : ""}>
+                  <Badge 
+                    variant={note.status === "Completed" ? "default" : "secondary"} 
+                    className={note.status === "Completed" ? "bg-green-100 text-green-800" : ""}
+                  >
                     {note.status}
                   </Badge>
                 </div>
