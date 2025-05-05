@@ -1,7 +1,6 @@
 
 import React from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
@@ -16,27 +15,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
-// Import the modular form field components
+// Import the schema and form field components
+import { patientFormSchema, PatientFormValues } from "./patient-form/patientSchema";
 import PersonalInfoFields from "./patient-form/PersonalInfoFields";
 import ContactInfoFields from "./patient-form/ContactInfoFields";
 import MedicalInfoFields from "./patient-form/MedicalInfoFields";
-
-const patientFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  age: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "Age must be a valid number.",
-  }),
-  gender: z.string().min(1, { message: "Please select a gender." }),
-  dob: z.string().min(1, { message: "Please enter date of birth." }),
-  address: z.string().min(5, { message: "Address must be at least 5 characters." }),
-  phone: z.string().min(5, { message: "Please enter a valid phone number." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  insurance: z.string().optional(),
-  status: z.string().min(1, { message: "Please select a status." }),
-  profilePicture: z.instanceof(File).optional(),
-});
-
-export type PatientFormValues = z.infer<typeof patientFormSchema>;
+import SectionHeader from "./patient-form/SectionHeader";
 
 interface PatientRegistrationModalProps {
   open: boolean;
@@ -84,12 +68,24 @@ const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> = ({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               {/* Personal Information Section */}
+              <SectionHeader 
+                title="Personal Information" 
+                description="Basic information about the patient"
+              />
               <PersonalInfoFields form={form} />
               
               {/* Contact Information Section */}
+              <SectionHeader 
+                title="Contact Information" 
+                description="How to reach the patient"
+              />
               <ContactInfoFields form={form} />
               
               {/* Medical Information Section */}
+              <SectionHeader 
+                title="Medical Information" 
+                description="Patient's medical details and status"
+              />
               <MedicalInfoFields form={form} />
             </div>
 
