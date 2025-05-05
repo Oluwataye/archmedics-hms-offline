@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import PatientRegistrationModal from '@/components/ehr/PatientRegistrationModal';
 
 // Sample patient data
 const patientsData = [
@@ -120,6 +121,7 @@ const PatientManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
 
   // Filter patients based on search term and filters
   const filteredPatients = patients.filter(patient => {
@@ -140,7 +142,36 @@ const PatientManagementPage = () => {
 
   // Handle adding a new patient
   const handleAddPatient = () => {
-    toast.info("New patient form would open in a modal");
+    setIsRegistrationModalOpen(true);
+  };
+
+  const handleNewPatientSave = (data: any) => {
+    // Generate a new patient ID
+    const newPatientId = `P-${Math.floor(10000 + Math.random() * 90000)}`;
+    
+    // Create a new patient object
+    const newPatient = {
+      id: newPatientId,
+      name: data.name,
+      age: parseInt(data.age),
+      gender: data.gender,
+      dob: data.dob,
+      address: data.address,
+      contact: data.phone,
+      email: data.email,
+      insurance: data.insurance || 'Not provided',
+      status: data.status,
+      lastVisit: 'Today'
+    };
+    
+    // Add the new patient to the list
+    setPatients([newPatient, ...patients]);
+    
+    // Show success message
+    toast.success(`Patient ${data.name} registered successfully with ID: ${newPatientId}`);
+    
+    // Close the modal
+    setIsRegistrationModalOpen(false);
   };
 
   // Handle patient deletion
@@ -186,6 +217,12 @@ const PatientManagementPage = () => {
           Add New Patient
         </Button>
       </div>
+
+      <PatientRegistrationModal
+        open={isRegistrationModalOpen}
+        onOpenChange={setIsRegistrationModalOpen}
+        onSave={handleNewPatientSave}
+      />
 
       {/* Filters and Search */}
       <Card>

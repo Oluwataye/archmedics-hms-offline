@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   User,
   Calendar,
@@ -15,9 +16,11 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import PatientVitals from '@/components/ehr/PatientVitals';
+import PatientRegistrationModal from '@/components/ehr/PatientRegistrationModal';
 
 const EHRDashboard = () => {
   const navigate = useNavigate();
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
 
   // Stats for dashboard
   const stats = [
@@ -83,6 +86,18 @@ const EHRDashboard = () => {
     },
   ];
 
+  const handleNewPatientSave = (data: any) => {
+    // In a real app, this would call an API to save the patient data
+    const newPatientId = `P-${Math.floor(10000 + Math.random() * 90000)}`;
+    toast.success(`Patient ${data.name} registered successfully with ID: ${newPatientId}`);
+    setIsRegistrationModalOpen(false);
+
+    // Navigate to the patient records page after successful registration
+    setTimeout(() => {
+      navigate('/ehr/records');
+    }, 1000);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -91,13 +106,19 @@ const EHRDashboard = () => {
           <Button 
             variant="default" 
             className="flex items-center gap-2"
-            onClick={() => navigate('/ehr/records')}
+            onClick={() => setIsRegistrationModalOpen(true)}
           >
             <PlusCircle className="h-4 w-4" />
             New Record
           </Button>
         </div>
       </div>
+
+      <PatientRegistrationModal 
+        open={isRegistrationModalOpen}
+        onOpenChange={setIsRegistrationModalOpen}
+        onSave={handleNewPatientSave}
+      />
 
       {/* Quick Search */}
       <Card className="w-full md:w-2/3">
