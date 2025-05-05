@@ -33,6 +33,7 @@ const patientFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   insurance: z.string().optional(),
   status: z.string().min(1, { message: "Please select a status." }),
+  profilePicture: z.instanceof(File).optional(),
 });
 
 export type PatientFormValues = z.infer<typeof patientFormSchema>;
@@ -60,6 +61,7 @@ const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> = ({
       email: "",
       insurance: "",
       status: "New",
+      profilePicture: undefined,
     },
   });
 
