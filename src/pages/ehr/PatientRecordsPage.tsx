@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from "sonner";
 import { healthRecordsService } from '@/services/healthRecordsService';
+import { FileText, Activity, ListFilter, AlertTriangle, Clock } from 'lucide-react';
+import { TabsContent } from '@/components/ui/tabs';
 
 // Import refactored components
 import PageHeader from '@/components/ehr/PageHeader';
