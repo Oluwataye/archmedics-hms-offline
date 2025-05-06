@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, Bell, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -12,6 +11,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 interface HeaderProps {
   toggleSidebar?: () => void;
@@ -20,6 +20,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Get current date and time formatted
   const currentDate = new Date().toLocaleDateString('en-US', { 
@@ -55,6 +56,24 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     if (path === '/lab/equipment') return 'Lab Equipment';
     
     return 'Dashboard';
+  };
+
+  // Handle profile click
+  const handleProfileClick = () => {
+    navigate('/ehr/profile');
+    toast.info('Navigating to your profile');
+  };
+
+  // Handle settings click
+  const handleSettingsClick = () => {
+    navigate('/settings');
+    toast.info('Navigating to settings');
+  };
+
+  // Handle logout with confirmation
+  const handleLogout = () => {
+    logout();
+    toast.success('Successfully logged out');
   };
 
   // Check if current user is cashier and on cashier dashboard
@@ -139,10 +158,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleProfileClick}>Profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSettingsClick}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}>
+            <DropdownMenuItem onClick={handleLogout}>
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

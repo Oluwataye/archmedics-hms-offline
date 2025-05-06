@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -135,12 +134,6 @@ const EHRDashboard = () => {
               <PlusCircle className="h-4 w-4" />
               New Record
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/ehr/profile')}
-            >
-              My Profile
-            </Button>
           </div>
         </div>
 
@@ -212,6 +205,7 @@ const EHRDashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Recent Patients and Activity Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Patients */}
           <Card 

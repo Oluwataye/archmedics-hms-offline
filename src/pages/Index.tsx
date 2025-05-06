@@ -10,7 +10,7 @@ const Index = () => {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        navigate('/dashboard');
+        navigate('/ehr'); // Direct to EHR dashboard instead of /dashboard
       } else {
         navigate('/login');
       }
