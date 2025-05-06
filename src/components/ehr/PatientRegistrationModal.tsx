@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Import the schema and form field components
 import { patientFormSchema, PatientFormValues } from "./patient-form/patientSchema";
@@ -56,7 +57,7 @@ const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Register New Patient</DialogTitle>
           <DialogDescription>
@@ -66,30 +67,32 @@ const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Personal Information Section */}
-              <SectionHeader 
-                title="Personal Information" 
-                description="Basic information about the patient"
-              />
-              <PersonalInfoFields form={form} />
-              
-              {/* Contact Information Section */}
-              <SectionHeader 
-                title="Contact Information" 
-                description="How to reach the patient"
-              />
-              <ContactInfoFields form={form} />
-              
-              {/* Medical Information Section */}
-              <SectionHeader 
-                title="Medical Information" 
-                description="Patient's medical details and status"
-              />
-              <MedicalInfoFields form={form} />
-            </div>
+            <ScrollArea className="h-[60vh] pr-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Personal Information Section */}
+                <SectionHeader 
+                  title="Personal Information" 
+                  description="Basic information about the patient"
+                />
+                <PersonalInfoFields form={form} />
+                
+                {/* Contact Information Section */}
+                <SectionHeader 
+                  title="Contact Information" 
+                  description="How to reach the patient"
+                />
+                <ContactInfoFields form={form} />
+                
+                {/* Medical Information Section */}
+                <SectionHeader 
+                  title="Medical Information" 
+                  description="Patient's medical details and status"
+                />
+                <MedicalInfoFields form={form} />
+              </div>
+            </ScrollArea>
 
-            <DialogFooter>
+            <DialogFooter className="mt-6">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
