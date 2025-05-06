@@ -35,7 +35,6 @@ const ProfilePage: React.FC = () => {
     e.preventDefault();
     
     // Here you would typically send the updated data to your backend
-    // This is a simplified version just using the local auth context
     updateProfile({
       name: formData.name,
       email: formData.email,
@@ -192,7 +191,7 @@ const ProfilePage: React.FC = () => {
                           value={formData.specialty}
                           onChange={handleInputChange}
                           placeholder="Your specialty"
-                          disabled={user?.role !== 'doctor'} 
+                          disabled={user?.role !== 'doctor' && user?.role !== 'ehr'} 
                         />
                       </div>
                     </div>

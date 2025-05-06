@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 
 // Define the User type
@@ -7,10 +8,20 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
+  phone?: string; // Added phone property
+  specialty?: string; // Added specialty property
 }
 
 // Define the UserRole type
 export type UserRole = 'admin' | 'doctor' | 'nurse' | 'pharmacist' | 'labtech' | 'cashier' | 'ehr';
+
+// Define the profile update type
+interface ProfileUpdateData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  specialty?: string;
+}
 
 // Define the AuthContext type
 interface AuthContextProps {
@@ -19,6 +30,7 @@ interface AuthContextProps {
   isLoading: boolean;
   login: (email: string, password: string) => boolean;
   logout: () => void;
+  updateProfile: (data: ProfileUpdateData) => void; // Added updateProfile method
 }
 
 // Create the AuthContext
@@ -61,6 +73,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         name: 'Dr. John Smith',
         email: email,
         role: 'doctor',
+        specialty: 'Cardiology',
+        phone: '(555) 123-4567',
       };
       setUser(doctorUser);
       setIsAuthenticated(true);
@@ -75,6 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         name: 'Nurse Emma',
         email: email,
         role: 'nurse',
+        phone: '(555) 234-5678',
       };
       setUser(nurseUser);
       setIsAuthenticated(true);
@@ -89,6 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         name: 'Pharmacist Taylor',
         email: email,
         role: 'pharmacist',
+        phone: '(555) 345-6789',
       };
       setUser(pharmacistUser);
       setIsAuthenticated(true);
@@ -103,6 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         name: 'Lab Tech Alex',
         email: email,
         role: 'labtech',
+        phone: '(555) 456-7890',
       };
       setUser(labtechUser);
       setIsAuthenticated(true);
@@ -117,6 +134,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         name: 'Cashier James',
         email: email,
         role: 'cashier',
+        phone: '(555) 567-8901',
       };
       setUser(cashierUser);
       setIsAuthenticated(true);
@@ -131,7 +149,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         name: 'Dr. Sarah Johnson',
         email: email,
         role: 'ehr',
-        avatar: 'https://randomuser.me/api/portraits/women/44.jpg'
+        avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+        phone: '(555) 678-9012',
+        specialty: 'Internal Medicine',
       };
       setUser(ehrUser);
       setIsAuthenticated(true);
@@ -148,12 +168,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem('user');
   };
 
+  // Add updateProfile function
+  const updateProfile = (data: ProfileUpdateData) => {
+    if (user) {
+      const updatedUser = {
+        ...user,
+        ...data,
+      };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return true;
+    }
+    return false;
+  };
+
   const value: AuthContextProps = {
     user,
     isAuthenticated,
     isLoading,
     login,
     logout,
+    updateProfile,
   };
 
   return (
