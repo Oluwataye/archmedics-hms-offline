@@ -1,304 +1,409 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calendar, Search, PlusCircle, Clock, User, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter
-} from '@/components/ui/card';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar as CalendarIcon, Search, Plus, FileText, Clock } from 'lucide-react';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import AppointmentForm from '@/components/ehr/AppointmentForm';
+
+// Mock appointment data
+const upcomingAppointments = [
+  {
+    id: "A001",
+    patientId: "P-10237",
+    patientName: "John Smith",
+    date: new Date(2025, 4, 10, 9, 0),
+    duration: "30 minutes",
+    type: "General Consultation",
+    doctor: "Dr. Emily Johnson",
+    status: "confirmed"
+  },
+  {
+    id: "A002",
+    patientId: "P-10892",
+    patientName: "Emily Davis",
+    date: new Date(2025, 4, 12, 10, 30),
+    duration: "45 minutes",
+    type: "Follow-up",
+    doctor: "Dr. Michael Chen",
+    status: "pending"
+  },
+  {
+    id: "A003",
+    patientId: "P-10745",
+    patientName: "Michael Brown",
+    date: new Date(2025, 4, 15, 14, 0),
+    duration: "1 hour",
+    type: "Specialist Referral",
+    doctor: "Dr. Sarah Wilson",
+    status: "confirmed"
+  }
+];
+
+const pastAppointments = [
+  {
+    id: "A004",
+    patientId: "P-10237",
+    patientName: "John Smith",
+    date: new Date(2025, 4, 2, 11, 0),
+    duration: "30 minutes",
+    type: "Follow-up",
+    doctor: "Dr. Emily Johnson",
+    status: "completed"
+  },
+  {
+    id: "A005",
+    patientId: "P-10892",
+    patientName: "Emily Davis",
+    date: new Date(2025, 3, 28, 15, 30),
+    duration: "45 minutes",
+    type: "General Consultation",
+    doctor: "Dr. Michael Chen",
+    status: "completed"
+  },
+  {
+    id: "A006",
+    patientId: "P-11023",
+    patientName: "David Garcia",
+    date: new Date(2025, 3, 25, 9, 30),
+    duration: "1 hour",
+    type: "Emergency",
+    doctor: "Dr. Sarah Wilson",
+    status: "no-show"
+  }
+];
+
+// Appointment status colors
+const statusColors: Record<string, string> = {
+  confirmed: "bg-green-100 text-green-800",
+  pending: "bg-yellow-100 text-yellow-800",
+  cancelled: "bg-red-100 text-red-800",
+  completed: "bg-blue-100 text-blue-800",
+  "no-show": "bg-gray-100 text-gray-800",
+};
 
 const AppointmentsPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('upcoming');
-  const isMobile = useIsMobile();
-
-  // Sample appointments data
-  const appointments = [
-    {
-      id: 1,
-      patientName: 'Maria Rodriguez',
-      patientId: 'PT-103958',
-      date: '2025-05-05T10:30:00',
-      doctor: 'Dr. Sarah Wilson',
-      department: 'Cardiology',
-      status: 'confirmed',
-      location: 'Main Campus, Room 305',
-      type: 'Follow-up',
-      duration: 30,
-    },
-    {
-      id: 2,
-      patientName: 'John Davis',
-      patientId: 'PT-104203',
-      date: '2025-05-05T13:15:00',
-      doctor: 'Dr. Michael Brown',
-      department: 'Neurology',
-      status: 'pending',
-      location: 'West Wing, Room 212',
-      type: 'Initial Consultation',
-      duration: 60,
-    },
-    {
-      id: 3,
-      patientName: 'Emily Johnson',
-      patientId: 'PT-102845',
-      date: '2025-05-06T09:00:00',
-      doctor: 'Dr. James Lee',
-      department: 'Orthopedics',
-      status: 'confirmed',
-      location: 'Main Campus, Room 118',
-      type: 'Post-operative',
-      duration: 45,
-    },
-    {
-      id: 4,
-      patientName: 'Robert Thompson',
-      patientId: 'PT-105672',
-      date: '2025-05-02T11:00:00',
-      doctor: 'Dr. Jennifer Adams',
-      department: 'Gastroenterology',
-      status: 'completed',
-      location: 'East Wing, Room 405',
-      type: 'Follow-up',
-      duration: 30,
-    },
-    {
-      id: 5,
-      patientName: 'Sophia Martinez',
-      patientId: 'PT-101247',
-      date: '2025-05-01T14:30:00',
-      doctor: 'Dr. David Chen',
-      department: 'Dermatology',
-      status: 'cancelled',
-      location: 'Main Campus, Room 210',
-      type: 'Consultation',
-      duration: 45,
-    },
-    {
-      id: 6,
-      patientName: 'William Wilson',
-      patientId: 'PT-106583',
-      date: '2025-04-30T10:15:00',
-      doctor: 'Dr. Elizabeth Taylor',
-      department: 'Pulmonology',
-      status: 'completed',
-      location: 'West Wing, Room 308',
-      type: 'Follow-up',
-      duration: 30,
-    }
-  ];
-
-  const today = new Date();
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
+  const [filterDoctor, setFilterDoctor] = useState("all");
+  const [filterAppointmentType, setFilterAppointmentType] = useState("all");
+  const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
   
-  const upcomingAppointments = appointments.filter(
-    app => new Date(app.date) >= today && app.status !== 'cancelled'
-  );
-  
-  const pastAppointments = appointments.filter(
-    app => new Date(app.date) < today || app.status === 'cancelled' || app.status === 'completed'
-  );
-  
-  const currentAppointments = activeTab === 'upcoming' ? upcomingAppointments : pastAppointments;
-  
-  const filteredAppointments = currentAppointments.filter(app => 
-    app.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    app.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    app.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    app.patientId.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const getStatusBadge = (status) => {
-    switch(status) {
-      case 'confirmed':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Confirmed</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200" variant="outline">Pending</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200" variant="destructive">Cancelled</Badge>;
-      case 'completed':
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Completed</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
+  // Filter appointments based on search and filters
+  const filterAppointments = (appointments: any[]) => {
+    return appointments.filter(appointment => {
+      // Search filter
+      const searchMatch = searchTerm === "" || 
+        appointment.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        appointment.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        appointment.doctor.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Date filter
+      const dateMatch = !filterDate || 
+        format(appointment.date, "yyyy-MM-dd") === format(filterDate, "yyyy-MM-dd");
+      
+      // Doctor filter
+      const doctorMatch = filterDoctor === "all" || 
+        appointment.doctor === filterDoctor;
+      
+      // Appointment type filter
+      const typeMatch = filterAppointmentType === "all" || 
+        appointment.type === filterAppointmentType;
+      
+      return searchMatch && dateMatch && doctorMatch && typeMatch;
+    });
   };
-
-  const formatAppointmentTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  const filteredUpcoming = filterAppointments(upcomingAppointments);
+  const filteredPast = filterAppointments(pastAppointments);
+  
+  // Unique doctors for filter
+  const doctors = ["all", ...Array.from(new Set([
+    ...upcomingAppointments.map(a => a.doctor),
+    ...pastAppointments.map(a => a.doctor)
+  ]))];
+  
+  // Unique appointment types for filter
+  const appointmentTypes = ["all", ...Array.from(new Set([
+    ...upcomingAppointments.map(a => a.type),
+    ...pastAppointments.map(a => a.type)
+  ]))];
+  
+  // Handle creating a new appointment
+  const handleCreateAppointment = (data: any) => {
+    console.log("Creating new appointment:", data);
+    // In a real app, this would send the data to an API
   };
-
-  const formatAppointmentDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  
+  // Handle viewing appointment details
+  const handleViewAppointment = (id: string) => {
+    toast.info(`Viewing appointment ${id} details`);
+    // In a real app, this might open a modal with appointment details
   };
-
+  
   return (
-    <div className="container mx-auto py-4 px-4 md:px-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-        <h1 className="text-2xl font-bold">EHR Appointments</h1>
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <div className="relative w-full sm:w-64 md:w-80">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search appointments..."
-              className="pl-8 w-full"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Appointments</h1>
+          <div className="text-sm text-gray-500 flex items-center mt-1">
+            <span>Health Records</span>
+            <span className="mx-2">›</span>
+            <span className="text-blue-500">Appointments</span>
           </div>
-          <Button className="whitespace-nowrap">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            New Appointment
-          </Button>
         </div>
+        <Button 
+          onClick={() => setIsNewAppointmentOpen(true)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" /> New Appointment
+        </Button>
       </div>
-
-      <Tabs defaultValue="upcoming" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="mb-4 w-full sm:w-auto">
-          <TabsTrigger value="upcoming" className="w-full sm:w-auto">Upcoming</TabsTrigger>
-          <TabsTrigger value="past" className="w-full sm:w-auto">Past & Cancelled</TabsTrigger>
-        </TabsList>
+      
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Appointment Management</CardTitle>
+        </CardHeader>
         
-        <TabsContent value="upcoming" className="mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredAppointments.length > 0 ? (
-              filteredAppointments.map((appointment) => (
-                <Card key={appointment.id}>
-                  <CardHeader className="bg-gray-50 pb-3">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                      <div>
-                        <CardTitle className="text-lg flex items-center gap-1">
-                          {appointment.patientName}
-                        </CardTitle>
-                        <CardDescription>{appointment.patientId}</CardDescription>
-                      </div>
-                      {getStatusBadge(appointment.status)}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-4 pb-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-start gap-2">
-                        <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{formatAppointmentDate(appointment.date)}</p>
-                          <p className="text-muted-foreground">{appointment.type}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <Clock className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{formatAppointmentTime(appointment.date)}</p>
-                          <p className="text-muted-foreground">{appointment.duration} min</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{appointment.doctor}</p>
-                          <p className="text-muted-foreground">{appointment.department}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="truncate">{appointment.location}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-2 flex flex-wrap gap-2">
-                    <Button variant="outline" size={isMobile ? "sm" : "default"} className="flex-1">
-                      View Details
-                    </Button>
-                    <Button variant="secondary" size={isMobile ? "sm" : "default"} className="flex-1">
-                      Reschedule
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-full flex justify-center py-8">
-                <p className="text-lg text-muted-foreground">No appointments found</p>
-              </div>
-            )}
+        <CardContent>
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                placeholder="Search by patient, ID, or doctor"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            
+            <div className="flex flex-wrap gap-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !filterDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filterDate ? format(filterDate, "PPP") : "Filter by date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={filterDate}
+                    onSelect={setFilterDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <Select value={filterDoctor} onValueChange={setFilterDoctor}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filter by doctor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {doctors.map((doctor) => (
+                    <SelectItem key={doctor} value={doctor}>
+                      {doctor === "all" ? "All Doctors" : doctor}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={filterAppointmentType} onValueChange={setFilterAppointmentType}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {appointmentTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type === "all" ? "All Types" : type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {(filterDate || filterDoctor !== "all" || filterAppointmentType !== "all" || searchTerm) && (
+                <Button 
+                  variant="ghost" 
+                  onClick={() => {
+                    setFilterDate(undefined);
+                    setFilterDoctor("all");
+                    setFilterAppointmentType("all");
+                    setSearchTerm("");
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </div>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="past" className="mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredAppointments.length > 0 ? (
-              filteredAppointments.map((appointment) => (
-                <Card key={appointment.id} className={appointment.status === 'cancelled' ? "border-red-200" : ""}>
-                  <CardHeader className={`pb-3 ${appointment.status === 'cancelled' ? "bg-red-50" : "bg-gray-50"}`}>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                      <div>
-                        <CardTitle className="text-lg flex items-center gap-1">
-                          {appointment.patientName}
-                        </CardTitle>
-                        <CardDescription>{appointment.patientId}</CardDescription>
-                      </div>
-                      {getStatusBadge(appointment.status)}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-4 pb-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-start gap-2">
-                        <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{formatAppointmentDate(appointment.date)}</p>
-                          <p className="text-muted-foreground">{appointment.type}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <Clock className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{formatAppointmentTime(appointment.date)}</p>
-                          <p className="text-muted-foreground">{appointment.duration} min</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{appointment.doctor}</p>
-                          <p className="text-muted-foreground">{appointment.department}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="truncate">{appointment.location}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-2">
-                    <Button variant="outline" size={isMobile ? "sm" : "default"} className="w-full">
-                      View Details
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-full flex justify-center py-8">
-                <p className="text-lg text-muted-foreground">No past appointments found</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+          
+          {/* Appointments Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="upcoming">Upcoming Appointments</TabsTrigger>
+              <TabsTrigger value="past">Past Appointments</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="upcoming">
+              {filteredUpcoming.length > 0 ? (
+                <div className="rounded-md border">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 border-b">
+                          <th className="py-3 px-4 text-left">Patient</th>
+                          <th className="py-3 px-4 text-left">Date & Time</th>
+                          <th className="py-3 px-4 text-left">Doctor</th>
+                          <th className="py-3 px-4 text-left">Type</th>
+                          <th className="py-3 px-4 text-left">Status</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredUpcoming.map((appointment) => (
+                          <tr key={appointment.id} className="border-b hover:bg-gray-50">
+                            <td className="py-3 px-4">
+                              <div>
+                                <p className="font-medium">{appointment.patientName}</p>
+                                <p className="text-gray-500 text-xs">{appointment.patientId}</p>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div>
+                                <p>{format(appointment.date, "MMM dd, yyyy")}</p>
+                                <p className="text-gray-500 text-xs">
+                                  {format(appointment.date, "h:mm a")} • {appointment.duration}
+                                </p>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              {appointment.doctor}
+                            </td>
+                            <td className="py-3 px-4">
+                              {appointment.type}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[appointment.status]}`}>
+                                {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleViewAppointment(appointment.id)}
+                              >
+                                View Details
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center p-10 border rounded-md">
+                  <Clock className="h-10 w-10 mx-auto mb-3 text-gray-400" />
+                  <h3 className="font-medium text-lg mb-2">No upcoming appointments</h3>
+                  <p className="text-gray-500 mb-4">No appointments match your current search criteria.</p>
+                  <Button onClick={() => setIsNewAppointmentOpen(true)}>
+                    Schedule New Appointment
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="past">
+              {filteredPast.length > 0 ? (
+                <div className="rounded-md border">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 border-b">
+                          <th className="py-3 px-4 text-left">Patient</th>
+                          <th className="py-3 px-4 text-left">Date & Time</th>
+                          <th className="py-3 px-4 text-left">Doctor</th>
+                          <th className="py-3 px-4 text-left">Type</th>
+                          <th className="py-3 px-4 text-left">Status</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredPast.map((appointment) => (
+                          <tr key={appointment.id} className="border-b hover:bg-gray-50">
+                            <td className="py-3 px-4">
+                              <div>
+                                <p className="font-medium">{appointment.patientName}</p>
+                                <p className="text-gray-500 text-xs">{appointment.patientId}</p>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div>
+                                <p>{format(appointment.date, "MMM dd, yyyy")}</p>
+                                <p className="text-gray-500 text-xs">
+                                  {format(appointment.date, "h:mm a")} • {appointment.duration}
+                                </p>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              {appointment.doctor}
+                            </td>
+                            <td className="py-3 px-4">
+                              {appointment.type}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[appointment.status]}`}>
+                                {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleViewAppointment(appointment.id)}
+                              >
+                                View Details
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center p-10 border rounded-md">
+                  <FileText className="h-10 w-10 mx-auto mb-3 text-gray-400" />
+                  <h3 className="font-medium text-lg mb-2">No past appointments found</h3>
+                  <p className="text-gray-500">No appointments match your current search criteria.</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+      
+      <AppointmentForm 
+        open={isNewAppointmentOpen}
+        onOpenChange={setIsNewAppointmentOpen}
+        onSubmit={handleCreateAppointment}
+      />
     </div>
   );
 };

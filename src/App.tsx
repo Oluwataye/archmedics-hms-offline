@@ -64,6 +64,7 @@ import MedicationsPage from "@/pages/ehr/MedicationsPage";
 import PatientStatisticsPage from "@/pages/ehr/PatientStatisticsPage";
 import DiseasePrevalencePage from "@/pages/ehr/DiseasePrevalencePage";
 import TreatmentOutcomesPage from "@/pages/ehr/TreatmentOutcomesPage";
+import ProfilePage from "@/pages/ehr/ProfilePage";
 
 // Create a new QueryClient instance in a more stable way
 const queryClient = new QueryClient({
@@ -91,8 +92,8 @@ const App = () => {
               <Route path="/" element={<AppLayout />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 
-                {/* Dynamic dashboard based on role */}
-                <Route path="/dashboard" element={<DashboardPage />} />
+                {/* Dynamic dashboard based on role - redirects to EHR dashboard */}
+                <Route path="/dashboard" element={<Navigate to="/ehr" replace />} />
                 
                 {/* Doctor routes */}
                 <Route path="/appointments" element={<AppointmentsPage />} />
@@ -151,6 +152,7 @@ const App = () => {
                 <Route path="/ehr/analytics/statistics" element={<PatientStatisticsPage />} />
                 <Route path="/ehr/analytics/disease" element={<DiseasePrevalencePage />} />
                 <Route path="/ehr/analytics/outcomes" element={<TreatmentOutcomesPage />} />
+                <Route path="/ehr/profile" element={<ProfilePage />} />
                 
                 {/* Billing routes */}
                 <Route path="/billing" element={<h1>Billing Page</h1>} />
