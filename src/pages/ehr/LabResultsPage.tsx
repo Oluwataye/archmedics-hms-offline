@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
   AlertTriangle, 
-  Search 
+  Search,
+  Plus
 } from 'lucide-react';
 import { toast } from "sonner";
 import {
@@ -16,15 +17,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const LabRequestsPage = () => {
   // State for filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [showNewTestModal, setShowNewTestModal] = useState(false);
+  
+  // State for the new test request form
+  const [newTestRequest, setNewTestRequest] = useState({
+    patient: '',
+    testType: '',
+    department: '',
+    priority: 'Routine',
+    notes: '',
+    specimenType: 'Blood'
+  });
 
   // Test requests data - would come from API in a real application
-  const allTestRequests = [
+  const [allTestRequests, setAllTestRequests] = useState([
     {
       id: 'LAB-10245',
       patient: 'John Smith (P-10237)',
@@ -133,7 +156,7 @@ const LabRequestsPage = () => {
       collectedAt: 'Apr 27, 2025, 10:15 AM',
       collectedBy: 'Nurse Robert Johnson'
     }
-  ];
+  ]);
 
   // Filter test requests based on search query and filters
   const filteredTestRequests = allTestRequests.filter(request => {
@@ -155,29 +178,118 @@ const LabRequestsPage = () => {
     return searchMatch && statusMatch && priorityMatch;
   });
 
-  // Handle process test button
+  // Handle process test button - implement functionality
   const handleProcessTest = (testId: string) => {
+    setAllTestRequests(prevTests => 
+      prevTests.map(test => 
+        test.id === testId 
+          ? { ...test, status: 'In Progress', statusClass: 'bg-blue-100 text-blue-800' } 
+          : test
+      )
+    );
     toast.success(`Started processing test ${testId}`);
   };
 
   // Handle view details button
   const handleViewDetails = (testId: string) => {
-    toast.info(`Viewing details for test ${testId}`);
+    const test = allTestRequests.find(test => test.id === testId);
+    if (test) {
+      toast.info(`
+        Test ID: ${test.id}
+        Patient: ${test.patient}
+        Test Type: ${test.testType}
+        Status: ${test.status}
+        Notes: ${test.notes}
+      `);
+    }
   };
 
   // Handle complete test button
   const handleCompleteTest = (testId: string) => {
+    setAllTestRequests(prevTests => 
+      prevTests.map(test => 
+        test.id === testId 
+          ? { ...test, status: 'Completed', statusClass: 'bg-green-100 text-green-800' } 
+          : test
+      )
+    );
     toast.success(`Test ${testId} marked as completed`);
   };
 
   // Handle verify test button
   const handleVerifyTest = (testId: string) => {
+    setAllTestRequests(prevTests => 
+      prevTests.map(test => 
+        test.id === testId 
+          ? { ...test, status: 'Verified', statusClass: 'bg-green-100 text-green-800' } 
+          : test
+      )
+    );
     toast.success(`Test ${testId} has been verified`);
   };
 
   // Handle adding a new test request
   const handleAddNewTest = () => {
-    toast.info("Creating a new test request");
+    setShowNewTestModal(true);
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewTestRequest({
+      ...newTestRequest,
+      [name]: value
+    });
+  };
+
+  // Handle form submission
+  const handleSubmitNewTest = () => {
+    // Validation
+    if (!newTestRequest.patient || !newTestRequest.testType || !newTestRequest.department) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Generate a new ID - in a real app this would come from the server
+    const newId = `LAB-${10250 + allTestRequests.length}`;
+
+    // Create the new test request object
+    const newTest = {
+      id: newId,
+      patient: newTestRequest.patient,
+      testType: newTestRequest.testType,
+      department: newTestRequest.department,
+      requestedBy: "Dr. Sarah Johnson", // Would be the logged-in user
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      priority: newTestRequest.priority,
+      priorityColor: newTestRequest.priority === 'STAT' ? 'bg-red-100 text-red-800' : 
+                    newTestRequest.priority === 'Urgent' ? 'bg-orange-100 text-orange-800' : 
+                    'bg-yellow-100 text-yellow-800',
+      status: 'Pending',
+      statusClass: 'bg-yellow-100 text-yellow-800',
+      notes: newTestRequest.notes,
+      specimenType: newTestRequest.specimenType,
+      specimenCollected: false,
+      collectedAt: '',
+      collectedBy: ''
+    };
+
+    // Add to the list
+    setAllTestRequests(prev => [...prev, newTest]);
+
+    // Close the modal and reset the form
+    setShowNewTestModal(false);
+    setNewTestRequest({
+      patient: '',
+      testType: '',
+      department: '',
+      priority: 'Routine',
+      notes: '',
+      specimenType: 'Blood'
+    });
+
+    toast.success(`New test request ${newId} created successfully`);
   };
 
   return (
@@ -218,6 +330,7 @@ const LabRequestsPage = () => {
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="critical">Critical</SelectItem>
+                  <SelectItem value="verified">Verified</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -245,6 +358,7 @@ const LabRequestsPage = () => {
             className="md:w-auto"
             style={{ backgroundColor: '#3B82F6' }}
           >
+            <Plus size={16} className="mr-1" />
             New Test Request
           </Button>
         </div>
@@ -359,6 +473,120 @@ const LabRequestsPage = () => {
           </div>
         )}
       </Card>
+      
+      {/* New Test Request Dialog */}
+      <Dialog open={showNewTestModal} onOpenChange={setShowNewTestModal}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>New Test Request</DialogTitle>
+            <DialogDescription>
+              Create a new laboratory test request for a patient.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="patient" className="text-right">
+                Patient *
+              </Label>
+              <Input
+                id="patient"
+                name="patient"
+                placeholder="Enter patient name or ID"
+                className="col-span-3"
+                value={newTestRequest.patient}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="testType" className="text-right">
+                Test Type *
+              </Label>
+              <Input
+                id="testType"
+                name="testType"
+                placeholder="Enter test type"
+                className="col-span-3"
+                value={newTestRequest.testType}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="department" className="text-right">
+                Department *
+              </Label>
+              <Input
+                id="department"
+                name="department"
+                placeholder="Enter department"
+                className="col-span-3"
+                value={newTestRequest.department}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="priority" className="text-right">
+                Priority
+              </Label>
+              <Select 
+                name="priority" 
+                defaultValue={newTestRequest.priority}
+                onValueChange={(value) => handleInputChange({ target: { name: 'priority', value } } as any)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Routine">Routine</SelectItem>
+                  <SelectItem value="Urgent">Urgent</SelectItem>
+                  <SelectItem value="STAT">STAT</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="specimenType" className="text-right">
+                Specimen
+              </Label>
+              <Select 
+                name="specimenType" 
+                defaultValue={newTestRequest.specimenType}
+                onValueChange={(value) => handleInputChange({ target: { name: 'specimenType', value } } as any)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select specimen type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Blood">Blood</SelectItem>
+                  <SelectItem value="Urine">Urine</SelectItem>
+                  <SelectItem value="Stool">Stool</SelectItem>
+                  <SelectItem value="CSF">CSF</SelectItem>
+                  <SelectItem value="Sputum">Sputum</SelectItem>
+                  <SelectItem value="Tissue">Tissue</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="notes" className="text-right align-top pt-2">
+                Notes
+              </Label>
+              <Textarea
+                id="notes"
+                name="notes"
+                placeholder="Enter any additional notes or instructions"
+                className="col-span-3"
+                rows={3}
+                value={newTestRequest.notes}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewTestModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitNewTest}>Submit Request</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       {/* Floating Action Button */}
       <Button 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,8 +26,9 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Download, Filter } from 'lucide-react';
 
-// Sample medications data
+// Sample enhanced medications data with patient info
 const medicationsData = [
   {
     id: 'MED-1024',
@@ -119,13 +119,44 @@ const medicationsData = [
     instructions: 'Take in the morning',
     interactions: ['Digoxin', 'Lithium'],
     sideEffects: ['Dehydration', 'Electrolyte imbalance']
+  },
+  {
+    id: 'MED-1030',
+    patientId: 'P-10237',
+    patientName: 'John Smith',
+    medication: 'Aspirin',
+    dosage: '81mg',
+    frequency: 'Once daily',
+    startDate: '2025-03-10',
+    endDate: '2025-06-10',
+    prescribedBy: 'Dr. Sarah Johnson',
+    status: 'Active',
+    instructions: 'Take with food to minimize stomach irritation',
+    interactions: ['Anticoagulants', 'NSAIDs'],
+    sideEffects: ['Stomach upset', 'Easy bruising']
+  },
+  {
+    id: 'MED-1031',
+    patientId: 'P-10454',
+    patientName: 'Sarah Thompson',
+    medication: 'Levothyroxine',
+    dosage: '50mcg',
+    frequency: 'Once daily',
+    startDate: '2025-01-05',
+    endDate: '2025-07-05',
+    prescribedBy: 'Dr. Jennifer Adams',
+    status: 'Active',
+    instructions: 'Take on empty stomach in the morning',
+    interactions: ['Calcium supplements', 'Iron supplements'],
+    sideEffects: ['Insomnia', 'Heart palpitations']
   }
 ];
 
 const MedicationsPage = () => {
   const [medications, setMedications] = useState(medicationsData);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [doctorFilter, setDoctorFilter] = useState('all');
   const [newMedication, setNewMedication] = useState({
     patientId: '',
     medication: '',
@@ -136,16 +167,22 @@ const MedicationsPage = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [viewMedicationDetails, setViewMedicationDetails] = useState<string | null>(null);
 
-  // Filter medications based on search term and status filter
+  // Get all unique doctors for filter
+  const uniqueDoctors = Array.from(new Set(medications.map(med => med.prescribedBy)))
+    .sort((a, b) => a.localeCompare(b));
+
+  // Filter medications based on search term and filters
   const filteredMedications = medications.filter(med => {
     const matchesSearch = 
       med.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       med.medication.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      med.patientId.toLowerCase().includes(searchTerm.toLowerCase());
+      med.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      med.prescribedBy.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter ? med.status === statusFilter : true;
+    const matchesStatus = statusFilter === 'all' ? true : med.status === statusFilter;
+    const matchesDoctor = doctorFilter === 'all' ? true : med.prescribedBy === doctorFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesDoctor;
   });
 
   // Get status badge color
@@ -195,6 +232,16 @@ const MedicationsPage = () => {
     }
   };
 
+  // Advanced search feature
+  const handleAdvancedSearch = () => {
+    toast.info("Advanced search functionality to be implemented");
+  };
+
+  // Export function for medications list
+  const handleExportMedications = () => {
+    toast.success("Medications list exported successfully");
+  };
+
   const handleAddMedication = () => {
     const requiredFields = ['patientId', 'medication', 'dosage', 'frequency'];
     const missingFields = requiredFields.filter(field => !newMedication[field as keyof typeof newMedication]);
@@ -204,7 +251,6 @@ const MedicationsPage = () => {
       return;
     }
 
-    // In a real app, this would be an API call to add the medication
     toast.success('Medication added successfully');
     setNewMedication({
       patientId: '',
@@ -216,31 +262,94 @@ const MedicationsPage = () => {
     setShowAddForm(false);
   };
 
+  // Get active vs. total medication count
+  const activeMedicationsCount = medications.filter(med => med.status === 'Active').length;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Medications</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Medications Database</h1>
           <div className="text-sm text-gray-500 flex items-center mt-1">
             <span>Health Records</span>
             <span className="mx-2">›</span>
             <span className="text-blue-500">Medications</span>
           </div>
         </div>
-        <Button 
-          onClick={() => setShowAddForm(!showAddForm)} 
-          className="flex items-center gap-2"
-        >
-          {showAddForm ? (
-            <>
-              <X className="h-4 w-4" /> Cancel
-            </>
-          ) : (
-            <>
-              <PlusCircle className="h-4 w-4" /> Add Medication
-            </>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={handleExportMedications}
+            className="flex items-center gap-2"
+          >
+            <Download size={16} />
+            Export
+          </Button>
+          <Button 
+            onClick={() => setShowAddForm(!showAddForm)} 
+            className="flex items-center gap-2"
+          >
+            {showAddForm ? (
+              <>
+                <X className="h-4 w-4" /> Cancel
+              </>
+            ) : (
+              <>
+                <PlusCircle className="h-4 w-4" /> Add Medication
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-blue-800">Total Medications</p>
+              <p className="text-3xl font-bold text-blue-900">{medications.length}</p>
+            </div>
+            <div className="bg-blue-200 p-3 rounded-full">
+              <Pill className="h-6 w-6 text-blue-700" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-green-800">Active Medications</p>
+              <p className="text-3xl font-bold text-green-900">{activeMedicationsCount}</p>
+            </div>
+            <div className="bg-green-200 p-3 rounded-full">
+              <CheckCircle className="h-6 w-6 text-green-700" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-yellow-800">Unique Patients</p>
+              <p className="text-3xl font-bold text-yellow-900">
+                {new Set(medications.map(m => m.patientId)).size}
+              </p>
+            </div>
+            <div className="bg-yellow-200 p-3 rounded-full">
+              <User className="h-6 w-6 text-yellow-700" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-purple-800">Unique Prescribers</p>
+              <p className="text-3xl font-bold text-purple-900">{uniqueDoctors.length}</p>
+            </div>
+            <div className="bg-purple-200 p-3 rounded-full">
+              <User className="h-6 w-6 text-purple-700" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Add Medication Form */}
@@ -315,14 +424,14 @@ const MedicationsPage = () => {
         </Card>
       )}
 
-      {/* Filters and Search */}
+      {/* Enhanced Filters and Search */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="relative w-full md:w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
-                placeholder="Search medications or patients..."
+                placeholder="Search medications, patients, doctors..."
                 className="pl-8"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -340,6 +449,29 @@ const MedicationsPage = () => {
                   <SelectItem value="Discontinued">Discontinued</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="w-full md:w-60">
+              <Select value={doctorFilter} onValueChange={setDoctorFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Prescriber" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Prescribers</SelectItem>
+                  {uniqueDoctors.map(doctor => (
+                    <SelectItem key={doctor} value={doctor}>{doctor}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="ml-auto">
+              <Button 
+                variant="outline" 
+                onClick={handleAdvancedSearch}
+                className="flex items-center gap-2"
+              >
+                <Filter size={16} />
+                Advanced Filters
+              </Button>
             </div>
           </div>
 
