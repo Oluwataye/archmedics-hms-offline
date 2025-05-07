@@ -37,6 +37,14 @@ const wardsData = [
   { id: 'W6', name: 'Isolation Ward', totalBeds: 8, availableBeds: 4 },
 ];
 
+// Sample doctors data
+const doctorsData = [
+  { id: 'dr-johnson', name: 'Dr. Johnson' },
+  { id: 'dr-wilson', name: 'Dr. Wilson' },
+  { id: 'dr-smith', name: 'Dr. Smith' },
+  { id: 'dr-davis', name: 'Dr. Davis' },
+];
+
 const WardAssignmentModal: React.FC<WardAssignmentModalProps> = ({
   open,
   onOpenChange,
@@ -216,10 +224,11 @@ const WardAssignmentModal: React.FC<WardAssignmentModalProps> = ({
                 <SelectValue placeholder="Select doctor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="dr-johnson">Dr. Johnson</SelectItem>
-                <SelectItem value="dr-wilson">Dr. Wilson</SelectItem>
-                <SelectItem value="dr-smith">Dr. Smith</SelectItem>
-                <SelectItem value="dr-davis">Dr. Davis</SelectItem>
+                {doctorsData.map((doctor) => (
+                  <SelectItem key={doctor.id} value={doctor.id}>
+                    {doctor.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
