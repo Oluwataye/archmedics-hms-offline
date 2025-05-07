@@ -10,6 +10,14 @@ interface MedicalInfoFieldsProps {
   form: UseFormReturn<PatientFormValues>;
 }
 
+// Define the status options to ensure consistent values
+const statusOptions = [
+  { value: "New", label: "New" },
+  { value: "Active", label: "Active" },
+  { value: "Follow-up", label: "Follow-up" },
+  { value: "Discharged", label: "Discharged" }
+];
+
 const MedicalInfoFields: React.FC<MedicalInfoFieldsProps> = ({ form }) => {
   return (
     <>
@@ -33,17 +41,18 @@ const MedicalInfoFields: React.FC<MedicalInfoFieldsProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Status</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value || statusOptions[0].value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="New">New</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Follow-up">Follow-up</SelectItem>
-                <SelectItem value="Discharged">Discharged</SelectItem>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />

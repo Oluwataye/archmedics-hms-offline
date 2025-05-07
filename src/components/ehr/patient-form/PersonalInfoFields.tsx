@@ -12,6 +12,13 @@ interface PersonalInfoFieldsProps {
   form: UseFormReturn<PatientFormValues>;
 }
 
+// Define gender options to ensure consistent values
+const genderOptions = [
+  { value: "Male", label: "Male" },
+  { value: "Female", label: "Female" },
+  { value: "Other", label: "Other" }
+];
+
 const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ form }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -113,16 +120,18 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Gender</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value || genderOptions[0].value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+                {genderOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />
