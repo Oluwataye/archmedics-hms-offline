@@ -16,6 +16,7 @@ import {
   Search,
   FileText,
   BarChart2,
+  FileSearch,
   Bug
 } from 'lucide-react';
 import {
@@ -219,7 +220,7 @@ const DiseasePrevalencePage = () => {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center">
-            <Bug size={18} className="mr-2 text-blue-500" />
+            <FileSearch size={18} className="mr-2 text-blue-500" />
             <CardTitle>Disease Prevalence</CardTitle>
           </div>
         </CardHeader>

@@ -16,7 +16,14 @@ import {
   Trash,
   Download,
   Filter,
-  MoreHorizontal
+  MoreHorizontal,
+  FileText,
+  Send,
+  BarChart2,
+  Bed,
+  UserCheck,
+  Users,
+  FileSearch
 } from 'lucide-react';
 import { 
   Select,
@@ -30,9 +37,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import PatientRegistrationModal from '@/components/ehr/PatientRegistrationModal';
+import MedicalHistoryModal from '@/components/ehr/MedicalHistoryModal';
+import ShareRecordsModal from '@/components/ehr/ShareRecordsModal';
+import PatientStatisticsModal from '@/components/ehr/PatientStatisticsModal';
+import WardAssignmentModal from '@/components/ehr/WardAssignmentModal';
 
 // Sample patient data
 const patientsData = [
@@ -122,6 +134,11 @@ const PatientManagementPage = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [isMedicalHistoryModalOpen, setIsMedicalHistoryModalOpen] = useState(false);
+  const [isShareRecordsModalOpen, setIsShareRecordsModalOpen] = useState(false);
+  const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
+  const [isWardAssignmentModalOpen, setIsWardAssignmentModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
   // Filter patients based on search term and filters
   const filteredPatients = patients.filter(patient => {
@@ -185,6 +202,30 @@ const PatientManagementPage = () => {
     toast.info(`Edit patient ${id} details would open in a modal`);
   };
 
+  // Handle view medical history
+  const handleViewMedicalHistory = (patient: any) => {
+    setSelectedPatient(patient);
+    setIsMedicalHistoryModalOpen(true);
+  };
+
+  // Handle sharing records
+  const handleShareRecords = (patient: any) => {
+    setSelectedPatient(patient);
+    setIsShareRecordsModalOpen(true);
+  };
+
+  // Handle ward assignment
+  const handleWardAssignment = (patient: any) => {
+    setSelectedPatient(patient);
+    setIsWardAssignmentModalOpen(true);
+  };
+
+  // Handle export patient list
+  const handleExportPatientList = () => {
+    toast.success('Patient list exported successfully');
+    // In a real app, this would generate a CSV or PDF
+  };
+
   // Status badge color based on status
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -212,59 +253,109 @@ const PatientManagementPage = () => {
             <span className="text-blue-500">Patient Management</span>
           </div>
         </div>
-        <Button onClick={handleAddPatient} className="flex items-center gap-2">
-          <PlusCircle className="h-4 w-4" />
-          Add New Patient
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsStatisticsModalOpen(true)} variant="outline" className="flex items-center gap-2">
+            <BarChart2 className="h-4 w-4" />
+            Patient Statistics
+          </Button>
+          <Button onClick={handleAddPatient} className="flex items-center gap-2">
+            <PlusCircle className="h-4 w-4" />
+            Add New Patient
+          </Button>
+        </div>
       </div>
 
+      {/* Modals */}
       <PatientRegistrationModal
         open={isRegistrationModalOpen}
         onOpenChange={setIsRegistrationModalOpen}
         onSave={handleNewPatientSave}
       />
+      
+      {selectedPatient && (
+        <>
+          <MedicalHistoryModal
+            open={isMedicalHistoryModalOpen}
+            onOpenChange={setIsMedicalHistoryModalOpen}
+            patientId={selectedPatient.id}
+            patientName={selectedPatient.name}
+          />
+          
+          <ShareRecordsModal
+            open={isShareRecordsModalOpen}
+            onOpenChange={setIsShareRecordsModalOpen}
+            patientId={selectedPatient.id}
+            patientName={selectedPatient.name}
+          />
+          
+          <WardAssignmentModal
+            open={isWardAssignmentModalOpen}
+            onOpenChange={setIsWardAssignmentModalOpen}
+            patientId={selectedPatient.id}
+            patientName={selectedPatient.name}
+          />
+        </>
+      )}
+      
+      <PatientStatisticsModal
+        open={isStatisticsModalOpen}
+        onOpenChange={setIsStatisticsModalOpen}
+      />
 
-      {/* Filters and Search */}
+      {/* Patient Management Card */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                placeholder="Search patients..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-6">
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row items-center gap-4 w-full">
+              <div className="relative w-full md:w-64">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                <Input
+                  placeholder="Search patients..."
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-4 w-full md:w-auto">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full md:w-40">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Status</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Follow-up">Follow-up</SelectItem>
+                    <SelectItem value="New">New</SelectItem>
+                    <SelectItem value="Discharged">Discharged</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={genderFilter} onValueChange={setGenderFilter}>
+                  <SelectTrigger className="w-full md:w-40">
+                    <SelectValue placeholder="Gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Genders</SelectItem>
+                    <SelectItem value="Male">Male</SelectItem>
+                    <SelectItem value="Female">Female</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="icon" title="More filters" className="hidden md:flex">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-4 w-full md:w-auto">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-40">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all_status">All Status</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Follow-up">Follow-up</SelectItem>
-                  <SelectItem value="New">New</SelectItem>
-                  <SelectItem value="Discharged">Discharged</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={genderFilter} onValueChange={setGenderFilter}>
-                <SelectTrigger className="w-full md:w-40">
-                  <SelectValue placeholder="Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all_gender">All Genders</SelectItem>
-                  <SelectItem value="Male">Male</SelectItem>
-                  <SelectItem value="Female">Female</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="icon" title="More filters" className="hidden md:flex">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
+            
+            {/* Export Button */}
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 whitespace-nowrap"
+              onClick={handleExportPatientList}
+            >
+              <Download className="h-4 w-4" />
+              Export List
+            </Button>
           </div>
 
           {/* Patient List */}
@@ -320,10 +411,10 @@ const PatientManagementPage = () => {
                               variant="ghost" 
                               size="icon" 
                               className="h-8 w-8 text-blue-500" 
-                              title="View Records"
-                              onClick={() => toast.info(`View records for ${patient.name}`)}
+                              title="Medical History"
+                              onClick={() => handleViewMedicalHistory(patient)}
                             >
-                              <File className="h-4 w-4" />
+                              <FileSearch className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
@@ -345,6 +436,13 @@ const PatientManagementPage = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleShareRecords(patient)}>
+                                  <Send className="h-4 w-4 mr-2" /> Share Records
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleWardAssignment(patient)}>
+                                  <Bed className="h-4 w-4 mr-2" /> Ward Assignment
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={() => toast.info(`Download records for ${patient.name}`)}>
                                   <Download className="h-4 w-4 mr-2" /> Download Records
                                 </DropdownMenuItem>
@@ -377,6 +475,62 @@ const PatientManagementPage = () => {
                 </div>
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Patient Statistics Dashboard */}
+      <Card>
+        <CardContent className="pt-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center">
+            <BarChart2 className="h-5 w-5 mr-2 text-blue-500" />
+            Patient Overview
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-blue-50 rounded-lg p-4 flex items-center">
+              <div className="rounded-full bg-blue-100 p-3 mr-4">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Total Patients</div>
+                <div className="text-2xl font-bold">{patients.length}</div>
+              </div>
+            </div>
+            
+            <div className="bg-green-50 rounded-lg p-4 flex items-center">
+              <div className="rounded-full bg-green-100 p-3 mr-4">
+                <UserCheck className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Active Patients</div>
+                <div className="text-2xl font-bold">
+                  {patients.filter(patient => patient.status === 'Active').length}
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-purple-50 rounded-lg p-4 flex items-center">
+              <div className="rounded-full bg-purple-100 p-3 mr-4">
+                <Calendar className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">New This Month</div>
+                <div className="text-2xl font-bold">
+                  {patients.filter(patient => patient.status === 'New').length}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              variant="link" 
+              onClick={() => setIsStatisticsModalOpen(true)}
+              className="text-blue-600"
+            >
+              View Detailed Patient Statistics
+            </Button>
           </div>
         </CardContent>
       </Card>

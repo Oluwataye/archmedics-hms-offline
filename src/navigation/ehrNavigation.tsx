@@ -1,12 +1,25 @@
 
 import React from 'react';
-import { LayoutDashboard, FileText, User, Calendar, NotebookPen, TestTube, FileText as Imaging, Pill, BarChart2, ChartBar, Bug } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  FileText, 
+  User, 
+  Calendar, 
+  NotebookPen, 
+  TestTube, 
+  FileText as Imaging, 
+  Pill, 
+  BarChart2, 
+  ChartBar, 
+  Users, 
+  FileSearch
+} from 'lucide-react';
 import { NavItem } from '@/types/navigation';
 
 export const getEHRNavigation = (): NavItem[] => [
   { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/ehr', isActive: true },
   { name: 'Patient Records', icon: <FileText size={20} />, path: '/ehr/records' },
-  { name: 'Patient Management', icon: <User size={20} />, path: '/ehr/patients' },
+  { name: 'Patient Management', icon: <Users size={20} />, path: '/ehr/patients' },
   { name: 'Appointments', icon: <Calendar size={20} />, path: '/ehr/appointments' },
   { 
     name: 'Clinical Notes', 
