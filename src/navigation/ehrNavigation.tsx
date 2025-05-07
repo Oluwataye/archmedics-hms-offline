@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, FileText, User, Calendar, NotebookPen, TestTube, FileText as Imaging, Pill, BarChart2, ChartBar, Virus } from 'lucide-react';
+import { LayoutDashboard, FileText, User, Calendar, NotebookPen, TestTube, FileText as Imaging, Pill, BarChart2, ChartBar, Bug } from 'lucide-react';
 import { NavItem } from '@/types/navigation';
 
 export const getEHRNavigation = (): NavItem[] => [
@@ -26,9 +26,9 @@ export const getEHRNavigation = (): NavItem[] => [
     icon: <BarChart2 size={20} />, 
     path: '/ehr/analytics',
     children: [
-      { name: 'Patient Statistics', path: '/ehr/analytics/statistics', icon: <ChartBar size={16} /> },
-      { name: 'Disease Prevalence', path: '/ehr/analytics/disease', icon: <Virus size={16} /> },
-      { name: 'Treatment Outcomes', path: '/ehr/analytics/outcomes', icon: <BarChart2 size={16} /> },
+      { name: 'Patient Statistics', path: '/ehr/analytics/statistics' },
+      { name: 'Disease Prevalence', path: '/ehr/analytics/disease' },
+      { name: 'Treatment Outcomes', path: '/ehr/analytics/outcomes' },
     ]
   },
 ];

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ import {
   Search,
   FileText,
   BarChart2,
-  Virus
+  Bug
 } from 'lucide-react';
 import {
   Select,
@@ -220,7 +219,7 @@ const DiseasePrevalencePage = () => {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center">
-            <Virus size={18} className="mr-2 text-blue-500" />
+            <Bug size={18} className="mr-2 text-blue-500" />
             <CardTitle>Disease Prevalence</CardTitle>
           </div>
         </CardHeader>
