@@ -22,6 +22,26 @@ interface DiseaseFilterOptionsProps {
   onGenderChange: (value: string) => void;
 }
 
+// Define constants for select options to ensure consistent values
+const TIME_RANGE_OPTIONS = [
+  { value: "all", label: "All Time" },
+  { value: "current", label: "Current Quarter" }
+];
+
+const AGE_GROUP_OPTIONS = [
+  { value: "all", label: "All Age Groups" },
+  { value: "Child", label: "Children (0-17)" },
+  { value: "Young Adult", label: "Young Adults (18-35)" },
+  { value: "Adult", label: "Adults (36-65)" },
+  { value: "Senior", label: "Seniors (65+)" }
+];
+
+const GENDER_OPTIONS = [
+  { value: "all", label: "All Genders" },
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" }
+];
+
 const DiseaseFilterOptions: React.FC<DiseaseFilterOptionsProps> = ({
   searchTerm,
   timeRange,
@@ -56,8 +76,11 @@ const DiseaseFilterOptions: React.FC<DiseaseFilterOptionsProps> = ({
                 <SelectValue placeholder="Time Range" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="current">Current Quarter</SelectItem>
+                {TIME_RANGE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -67,11 +90,11 @@ const DiseaseFilterOptions: React.FC<DiseaseFilterOptionsProps> = ({
                 <SelectValue placeholder="Age Group" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Age Groups</SelectItem>
-                <SelectItem value="Child">Children (0-17)</SelectItem>
-                <SelectItem value="Young Adult">Young Adults (18-35)</SelectItem>
-                <SelectItem value="Adult">Adults (36-65)</SelectItem>
-                <SelectItem value="Senior">Seniors (65+)</SelectItem>
+                {AGE_GROUP_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -81,9 +104,11 @@ const DiseaseFilterOptions: React.FC<DiseaseFilterOptionsProps> = ({
                 <SelectValue placeholder="Gender" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Genders</SelectItem>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
+                {GENDER_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
