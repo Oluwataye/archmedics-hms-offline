@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Search, Send, User, Mail, HomeIcon } from 'lucide-react';
 
@@ -113,7 +113,7 @@ const ShareRecordsModal: React.FC<ShareRecordsModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center">
             <Send className="h-5 w-5 mr-2 text-blue-500" />
@@ -124,149 +124,151 @@ const ShareRecordsModal: React.FC<ShareRecordsModalProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4">
-          {/* Clinical Unit/Ward Selection */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">Select Clinical Unit/Ward</h3>
-            <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a clinical unit or ward" />
-              </SelectTrigger>
-              <SelectContent>
-                {clinicalUnits.map(unit => (
-                  <SelectItem key={unit.value} value={unit.value}>
-                    {unit.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1">
-              All healthcare providers in the selected unit will have access to these records
-            </p>
-          </div>
+        <ScrollArea className="h-[calc(90vh-180px)]">
+          <div className="space-y-4 pr-4">
+            {/* Clinical Unit/Ward Selection */}
+            <div>
+              <h3 className="text-sm font-medium mb-2">Select Clinical Unit/Ward</h3>
+              <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a clinical unit or ward" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clinicalUnits.map(unit => (
+                    <SelectItem key={unit.value} value={unit.value}>
+                      {unit.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                All healthcare providers in the selected unit will have access to these records
+              </p>
+            </div>
 
-          {/* Search healthcare providers */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">Select Individual Recipients</h3>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                placeholder="Search by name, department or role..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+            {/* Search healthcare providers */}
+            <div>
+              <h3 className="text-sm font-medium mb-2">Select Individual Recipients</h3>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                <Input
+                  placeholder="Search by name, department or role..."
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            {/* Healthcare providers list */}
+            <div className="border rounded-md max-h-60 overflow-y-auto">
+              {filteredStaff.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  No matching healthcare providers found
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {filteredStaff.map((staff) => (
+                    <div key={staff.id} className="flex items-center p-3 hover:bg-gray-50">
+                      <Checkbox 
+                        id={`staff-${staff.id}`}
+                        checked={selectedStaff.includes(staff.id)}
+                        onCheckedChange={() => handleStaffSelection(staff.id)}
+                      />
+                      <div className="ml-3 flex-1">
+                        <Label htmlFor={`staff-${staff.id}`} className="font-medium">{staff.name}</Label>
+                        <div className="text-xs text-gray-500 flex items-center gap-2">
+                          <span>{staff.role}</span>
+                          <span>•</span>
+                          <span>{staff.department}</span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500 flex items-center">
+                        <Mail className="h-3 w-3 mr-1" />
+                        {staff.email}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Record types to include */}
+            <div>
+              <h3 className="text-sm font-medium mb-2">Records to Include</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-demographics" 
+                    checked={includeOptions.demographics} 
+                    onCheckedChange={(checked) => setIncludeOptions({...includeOptions, demographics: !!checked})}
+                  />
+                  <Label htmlFor="include-demographics">Demographics</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-medical-history" 
+                    checked={includeOptions.medicalHistory} 
+                    onCheckedChange={(checked) => setIncludeOptions({...includeOptions, medicalHistory: !!checked})}
+                  />
+                  <Label htmlFor="include-medical-history">Medical History</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-medications" 
+                    checked={includeOptions.medications} 
+                    onCheckedChange={(checked) => setIncludeOptions({...includeOptions, medications: !!checked})}
+                  />
+                  <Label htmlFor="include-medications">Medications</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-lab-results" 
+                    checked={includeOptions.labResults} 
+                    onCheckedChange={(checked) => setIncludeOptions({...includeOptions, labResults: !!checked})}
+                  />
+                  <Label htmlFor="include-lab-results">Lab Results</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-visits" 
+                    checked={includeOptions.visits} 
+                    onCheckedChange={(checked) => setIncludeOptions({...includeOptions, visits: !!checked})}
+                  />
+                  <Label htmlFor="include-visits">Visit History</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-allergies" 
+                    checked={includeOptions.allergies} 
+                    onCheckedChange={(checked) => setIncludeOptions({...includeOptions, allergies: !!checked})}
+                  />
+                  <Label htmlFor="include-allergies">Allergies</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-immunizations" 
+                    checked={includeOptions.immunizations} 
+                    onCheckedChange={(checked) => setIncludeOptions({...includeOptions, immunizations: !!checked})}
+                  />
+                  <Label htmlFor="include-immunizations">Immunizations</Label>
+                </div>
+              </div>
+            </div>
+            
+            {/* Additional note */}
+            <div>
+              <Label htmlFor="note" className="text-sm font-medium">Add a Note (optional)</Label>
+              <Textarea 
+                id="note" 
+                placeholder="Include any additional information or instructions..." 
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="mt-1"
               />
             </div>
           </div>
-          
-          {/* Healthcare providers list */}
-          <div className="border rounded-md max-h-60 overflow-y-auto">
-            {filteredStaff.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No matching healthcare providers found
-              </div>
-            ) : (
-              <div className="divide-y">
-                {filteredStaff.map((staff) => (
-                  <div key={staff.id} className="flex items-center p-3 hover:bg-gray-50">
-                    <Checkbox 
-                      id={`staff-${staff.id}`}
-                      checked={selectedStaff.includes(staff.id)}
-                      onCheckedChange={() => handleStaffSelection(staff.id)}
-                    />
-                    <div className="ml-3 flex-1">
-                      <Label htmlFor={`staff-${staff.id}`} className="font-medium">{staff.name}</Label>
-                      <div className="text-xs text-gray-500 flex items-center gap-2">
-                        <span>{staff.role}</span>
-                        <span>•</span>
-                        <span>{staff.department}</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500 flex items-center">
-                      <Mail className="h-3 w-3 mr-1" />
-                      {staff.email}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          {/* Record types to include */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">Records to Include</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="include-demographics" 
-                  checked={includeOptions.demographics} 
-                  onCheckedChange={(checked) => setIncludeOptions({...includeOptions, demographics: !!checked})}
-                />
-                <Label htmlFor="include-demographics">Demographics</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="include-medical-history" 
-                  checked={includeOptions.medicalHistory} 
-                  onCheckedChange={(checked) => setIncludeOptions({...includeOptions, medicalHistory: !!checked})}
-                />
-                <Label htmlFor="include-medical-history">Medical History</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="include-medications" 
-                  checked={includeOptions.medications} 
-                  onCheckedChange={(checked) => setIncludeOptions({...includeOptions, medications: !!checked})}
-                />
-                <Label htmlFor="include-medications">Medications</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="include-lab-results" 
-                  checked={includeOptions.labResults} 
-                  onCheckedChange={(checked) => setIncludeOptions({...includeOptions, labResults: !!checked})}
-                />
-                <Label htmlFor="include-lab-results">Lab Results</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="include-visits" 
-                  checked={includeOptions.visits} 
-                  onCheckedChange={(checked) => setIncludeOptions({...includeOptions, visits: !!checked})}
-                />
-                <Label htmlFor="include-visits">Visit History</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="include-allergies" 
-                  checked={includeOptions.allergies} 
-                  onCheckedChange={(checked) => setIncludeOptions({...includeOptions, allergies: !!checked})}
-                />
-                <Label htmlFor="include-allergies">Allergies</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="include-immunizations" 
-                  checked={includeOptions.immunizations} 
-                  onCheckedChange={(checked) => setIncludeOptions({...includeOptions, immunizations: !!checked})}
-                />
-                <Label htmlFor="include-immunizations">Immunizations</Label>
-              </div>
-            </div>
-          </div>
-          
-          {/* Additional note */}
-          <div>
-            <Label htmlFor="note" className="text-sm font-medium">Add a Note (optional)</Label>
-            <Textarea 
-              id="note" 
-              placeholder="Include any additional information or instructions..." 
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-        </div>
+        </ScrollArea>
         
         <div className="flex justify-between mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
