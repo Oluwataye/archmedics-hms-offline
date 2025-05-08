@@ -13,6 +13,28 @@ interface PatientSearchFiltersProps {
   setPatientStatus: (status: string) => void;
 }
 
+// Define constants for select options
+const DEPARTMENT_OPTIONS = [
+  { value: "all", label: "All Departments" },
+  { value: "cardiology", label: "Cardiology" },
+  { value: "neurology", label: "Neurology" },
+  { value: "pediatrics", label: "Pediatrics" },
+  { value: "orthopedics", label: "Orthopedics" },
+  { value: "internal", label: "Internal Medicine" },
+  { value: "gynecology", label: "Gynecology" },
+  { value: "oncology", label: "Oncology" }
+];
+
+const STATUS_OPTIONS = [
+  { value: "all", label: "All Status" },
+  { value: "active", label: "Active" },
+  { value: "pending", label: "Pending" },
+  { value: "follow-up", label: "Follow-up" },
+  { value: "discharged", label: "Discharged" },
+  { value: "critical", label: "Critical" },
+  { value: "new", label: "New" }
+];
+
 const PatientSearchFilters: React.FC<PatientSearchFiltersProps> = ({
   searchTerm,
   setSearchTerm,
@@ -42,14 +64,11 @@ const PatientSearchFilters: React.FC<PatientSearchFiltersProps> = ({
             <SelectValue placeholder="Department" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Departments</SelectItem>
-            <SelectItem value="cardiology">Cardiology</SelectItem>
-            <SelectItem value="neurology">Neurology</SelectItem>
-            <SelectItem value="pediatrics">Pediatrics</SelectItem>
-            <SelectItem value="orthopedics">Orthopedics</SelectItem>
-            <SelectItem value="internal">Internal Medicine</SelectItem>
-            <SelectItem value="gynecology">Gynecology</SelectItem>
-            <SelectItem value="oncology">Oncology</SelectItem>
+            {DEPARTMENT_OPTIONS.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={patientStatus} onValueChange={setPatientStatus}>
@@ -57,13 +76,11 @@ const PatientSearchFilters: React.FC<PatientSearchFiltersProps> = ({
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="follow-up">Follow-up</SelectItem>
-            <SelectItem value="discharged">Discharged</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
-            <SelectItem value="new">New</SelectItem>
+            {STATUS_OPTIONS.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

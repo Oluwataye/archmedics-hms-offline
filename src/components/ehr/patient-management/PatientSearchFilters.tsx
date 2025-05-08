@@ -21,6 +21,22 @@ interface PatientSearchFiltersProps {
   onExport: () => void;
 }
 
+// Define constants for select options
+const STATUS_OPTIONS = [
+  { value: "all", label: "All Status" },
+  { value: "Active", label: "Active" },
+  { value: "Follow-up", label: "Follow-up" },
+  { value: "New", label: "New" },
+  { value: "Discharged", label: "Discharged" }
+];
+
+const GENDER_OPTIONS = [
+  { value: "all", label: "All Genders" },
+  { value: "Male", label: "Male" },
+  { value: "Female", label: "Female" },
+  { value: "Other", label: "Other" }
+];
+
 const PatientSearchFilters: React.FC<PatientSearchFiltersProps> = ({
   searchTerm,
   setSearchTerm,
@@ -49,11 +65,11 @@ const PatientSearchFilters: React.FC<PatientSearchFiltersProps> = ({
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Status</SelectItem>
-              <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Follow-up">Follow-up</SelectItem>
-              <SelectItem value="New">New</SelectItem>
-              <SelectItem value="Discharged">Discharged</SelectItem>
+              {STATUS_OPTIONS.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={genderFilter} onValueChange={setGenderFilter}>
@@ -61,10 +77,11 @@ const PatientSearchFilters: React.FC<PatientSearchFiltersProps> = ({
               <SelectValue placeholder="Gender" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Genders</SelectItem>
-              <SelectItem value="Male">Male</SelectItem>
-              <SelectItem value="Female">Female</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
+              {GENDER_OPTIONS.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Button variant="outline" size="icon" title="More filters" className="hidden md:flex">

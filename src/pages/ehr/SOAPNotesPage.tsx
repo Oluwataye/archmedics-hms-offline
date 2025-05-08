@@ -20,6 +20,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+// Define filter options
+const FILTER_OPTIONS = [
+  { value: "all", label: "All Types" },
+  { value: "initial visit", label: "Initial Visit" },
+  { value: "follow-up", label: "Follow-up" },
+  { value: "urgent care", label: "Urgent Care" }
+];
+
 const SOAPNotesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
@@ -106,10 +114,11 @@ const SOAPNotesPage = () => {
               <SelectValue placeholder="Filter" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="initial visit">Initial Visit</SelectItem>
-              <SelectItem value="follow-up">Follow-up</SelectItem>
-              <SelectItem value="urgent care">Urgent Care</SelectItem>
+              {FILTER_OPTIONS.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Button className="whitespace-nowrap">
