@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -5,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Search, Send, User, Mail } from 'lucide-react';
+import { Search, Send, User, Mail, HomeIcon } from 'lucide-react';
 
 interface ShareRecordsModalProps {
   open: boolean;
@@ -24,6 +26,20 @@ const staffData = [
   { id: 'N-002', name: 'Nurse Thompson', role: 'Nurse', department: 'Emergency', email: 'thompson@hospital.com' },
 ];
 
+// Clinical units/wards for the dropdown
+const clinicalUnits = [
+  { value: "general-ward", label: "General Ward" },
+  { value: "emergency", label: "Emergency Department" },
+  { value: "icu", label: "Intensive Care Unit" },
+  { value: "pediatrics", label: "Pediatrics Ward" },
+  { value: "maternity", label: "Maternity Ward" },
+  { value: "surgery", label: "Surgical Ward" },
+  { value: "cardiology", label: "Cardiology Unit" },
+  { value: "neurology", label: "Neurology Unit" },
+  { value: "oncology", label: "Oncology Unit" },
+  { value: "orthopedics", label: "Orthopedics Ward" },
+];
+
 const ShareRecordsModal: React.FC<ShareRecordsModalProps> = ({
   open,
   onOpenChange,
@@ -32,6 +48,7 @@ const ShareRecordsModal: React.FC<ShareRecordsModalProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
+  const [selectedUnit, setSelectedUnit] = useState<string>("");
   const [includeOptions, setIncludeOptions] = useState({
     demographics: true,
     medicalHistory: true,
@@ -61,8 +78,8 @@ const ShareRecordsModal: React.FC<ShareRecordsModalProps> = ({
   
   // Handle send records
   const handleSendRecords = () => {
-    if (selectedStaff.length === 0) {
-      toast.error('Please select at least one recipient');
+    if (selectedStaff.length === 0 && !selectedUnit) {
+      toast.error('Please select at least one recipient or a clinical unit');
       return;
     }
     
@@ -75,8 +92,18 @@ const ShareRecordsModal: React.FC<ShareRecordsModalProps> = ({
       .map(([type]) => type);
     
     // In a real application, this would send an API request
+    let successMessage = '';
+    
+    if (recipients.length > 0 && selectedUnit) {
+      successMessage = `Patient records for ${patientName} sent to ${recipients.length} healthcare provider(s) and ${clinicalUnits.find(unit => unit.value === selectedUnit)?.label}`;
+    } else if (recipients.length > 0) {
+      successMessage = `Patient records for ${patientName} sent to ${recipients.length} healthcare provider(s)`;
+    } else if (selectedUnit) {
+      successMessage = `Patient records for ${patientName} sent to ${clinicalUnits.find(unit => unit.value === selectedUnit)?.label}`;
+    }
+    
     toast.success(
-      `Patient records for ${patientName} sent to ${recipients.length} healthcare provider(s)`,
+      successMessage,
       { description: `Included: ${selectedRecordTypes.join(', ')}` }
     );
     
@@ -93,14 +120,34 @@ const ShareRecordsModal: React.FC<ShareRecordsModalProps> = ({
             Share Patient Records
           </DialogTitle>
           <DialogDescription>
-            Send {patientName}'s records (ID: {patientId}) to healthcare providers
+            Send {patientName}'s records (ID: {patientId}) to healthcare providers or clinical units
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
+          {/* Clinical Unit/Ward Selection */}
+          <div>
+            <h3 className="text-sm font-medium mb-2">Select Clinical Unit/Ward</h3>
+            <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a clinical unit or ward" />
+              </SelectTrigger>
+              <SelectContent>
+                {clinicalUnits.map(unit => (
+                  <SelectItem key={unit.value} value={unit.value}>
+                    {unit.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              All healthcare providers in the selected unit will have access to these records
+            </p>
+          </div>
+
           {/* Search healthcare providers */}
           <div>
-            <h3 className="text-sm font-medium mb-2">Select Recipients</h3>
+            <h3 className="text-sm font-medium mb-2">Select Individual Recipients</h3>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
