@@ -1,1 +1,22 @@
+import knex from 'knex';
+import config from '../../knexfile';
+import { logger } from '../utils/logger';
+
+const environment = process.env.NODE_ENV || 'development';
+const dbConfig = config[environment];
+
+export const db = knex(dbConfig);
+
+export const connectDatabase = async () => {
+  try {
+    await db.raw('SELECT 1');
+    logger.info('Database connection established successfully');
+  } catch (error) {
+    logger.error('Unable to connect to the database:', error);
+    throw error;
+  }
+};
+
+export default db;
+
 
