@@ -10,13 +10,22 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
+    react(), // Ensure React plugin is properly applied
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, 'src'), // ✅ Remove leading `./`, use absolute path
+      '@/*': path.resolve(__dirname, 'src/*'), // Optional: more explicit for tooling
     },
+  },
+  // --- Add explicit support for TSX files ---
+  esbuild: {
+    jsxFactory: 'jsx',
+    jsxInject: `import React from 'react'`,
+  },
+  // --- Ensure TypeScript is processed correctly ---
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(mode),
   },
 }));
