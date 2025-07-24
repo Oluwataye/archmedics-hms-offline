@@ -10,35 +10,47 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {
-    return res.status(401).json({ message: 'Access token required' });
+    res.status(401).json({ message: 'Access token required' });
+    return;
   }
 
-  jwt.verify(token, process.env.JWT_SECRET!, (err, user) => {
-    if (err) {
-      logger.warn(`Invalid token attempt: ${err.message}`);
-      return res.status(403).json({ message: 'Invalid or expired token' });
-    }
-    req.user = user as { id: string; email: string; role: string };
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      id: string;
+      email: string;
+      role: string;
+    };
+
+    req.user = decoded;
     next();
-  });
+  } catch (error) {
+    logger.error('Token verification error:', error);
+    res.status(403).json({ message: 'Invalid or expired token' });
+    return;
+  }
 };
 
 export const authorizeRoles = (...roles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      return res.status(401).json({ message: 'Authentication required' });
+      res.status(401).json({ message: 'Authentication required' });
+      return;
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Insufficient permissions' });
+      res.status(403).json({ 
+        message: 'Insufficient permissions',
+        requiredRoles: roles,
+        userRole: req.user.role
+      });
+      return;
     }
 
     next();
   };
 };
-
