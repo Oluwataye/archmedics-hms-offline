@@ -1,179 +1,222 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import AppLayout from '@/components/layout/AppLayout';
+import LoginPage from '@/pages/LoginPage';
+import DashboardPage from '@/pages/DashboardPage';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import React from 'react';
+// EHR Pages (existing)
+import PatientRecords from '@/pages/ehr/PatientRecordsPage';
+import PatientManagement from '@/pages/ehr/PatientManagementPage';
+import Appointments from '@/pages/ehr/AppointmentsPage';
+import ProgressNotes from '@/pages/ehr/ProgressNotesPage';
+import SOAPNotes from '@/pages/ehr/SOAPNotesPage';
+import DischargeNotes from '@/pages/ehr/DischargeNotesPage';
+import LabResults from '@/pages/ehr/LabResultsPage';
+import Imaging from '@/pages/ehr/ImagingPage';
+import Medications from '@/pages/ehr/MedicationsPage';
+import PatientStatistics from '@/pages/ehr/PatientStatisticsPage';
+import DiseasePrevalence from '@/pages/ehr/DiseasePrevalencePage';
+import TreatmentOutcomes from '@/pages/ehr/TreatmentOutcomesPage';
 
-// Layouts
-import AppLayout from "@/components/layout/AppLayout";
+// Protected Route Component
+const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) => {
+  const { user, loading } = useAuth();
 
-// Pages
-import LoginPage from "@/pages/LoginPage";
-import DashboardPage from "@/pages/DashboardPage";
-import NotFound from "@/pages/NotFound";
+  if (loading) {
+    return <LoadingSpinner fullScreen text="Loading..." />;
+  }
 
-// Doctor Pages
-import DoctorDashboardPage from "@/pages/doctor/DoctorDashboardPage";
-import AppointmentsPage from "@/pages/doctor/AppointmentsPage";
-import PatientsPage from "@/pages/doctor/PatientsPage";
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
-// Nurse Pages
-import NurseDashboard from "@/pages/nurse/NurseDashboard";
-import NursePatientsPage from "@/pages/nurse/PatientsPage";
-import VitalsPage from "@/pages/nurse/VitalsPage";
-import MedicationPage from "@/pages/nurse/MedicationPage";
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to={`/${user.role}`} replace />;
+  }
 
-// Pharmacy Pages
-import PharmacistDashboard from "@/pages/pharmacy/PharmacistDashboard";
-import PrescriptionsPage from "@/pages/pharmacy/PrescriptionsPage";
-import InventoryPage from "@/pages/pharmacy/InventoryPage";
-import DispensaryPage from "@/pages/pharmacy/DispensaryPage";
-import AlertsPage from "@/pages/pharmacy/AlertsPage";
-
-// Cashier Pages
-import CashierDashboard from "@/pages/cashier/CashierDashboard";
-import ReportsPage from "@/pages/cashier/ReportsPage";
-import ReprintPage from "@/pages/cashier/ReprintPage";
-import RefundsPage from "@/pages/cashier/RefundsPage";
-
-// Lab Technician Pages
-import LabDashboard from "@/pages/lab/LabDashboard";
-import LabRequestsPage from "@/pages/lab/LabRequestsPage";
-import ResultsPage from "@/pages/lab/ResultsPage";
-import PendingResultsPage from "@/pages/lab/PendingResultsPage";
-import CompletedResultsPage from "@/pages/lab/CompletedResultsPage";
-import CriticalResultsPage from "@/pages/lab/CriticalResultsPage";
-import LabInventoryPage from "@/pages/lab/InventoryPage";
-import QualityControlPage from "@/pages/lab/QualityControlPage";
-import EquipmentPage from "@/pages/lab/EquipmentPage";
-
-// EHR Pages (Health Record Management)
-import EHRDashboard from "@/pages/ehr/EHRDashboard";
-import PatientRecordsPage from "@/pages/ehr/PatientRecordsPage";
-import PatientManagementPage from "@/pages/ehr/PatientManagementPage";
-import EHRAppointmentsPage from "@/pages/ehr/AppointmentsPage";
-import ProgressNotesPage from "@/pages/ehr/ProgressNotesPage";
-import SOAPNotesPage from "@/pages/ehr/SOAPNotesPage";
-import DischargeNotesPage from "@/pages/ehr/DischargeNotesPage";
-import LabResultsPage from "@/pages/ehr/LabResultsPage";
-import ImagingPage from "@/pages/ehr/ImagingPage";
-import MedicationsPage from "@/pages/ehr/MedicationsPage";
-import PatientStatisticsPage from "@/pages/ehr/PatientStatisticsPage";
-import DiseasePrevalencePage from "@/pages/ehr/DiseasePrevalencePage";
-import TreatmentOutcomesPage from "@/pages/ehr/TreatmentOutcomesPage";
-import ProfilePage from "@/pages/ehr/ProfilePage";
-
-// Create a new QueryClient instance in a more stable way
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
-const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/login" element={<LoginPage />} />
-              
-              {/* Protected routes */}
-              <Route path="/" element={<AppLayout />}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                
-                {/* Dynamic dashboard based on role - redirects to EHR dashboard */}
-                <Route path="/dashboard" element={<Navigate to="/ehr" replace />} />
-                
-                {/* Doctor routes */}
-                <Route path="/appointments" element={<AppointmentsPage />} />
-                <Route path="/patients" element={<PatientsPage />} />
-                <Route path="/consultations" element={<h1>Consultations Page</h1>} />
-                <Route path="/prescriptions" element={<h1>Prescriptions Page</h1>} />
-                
-                {/* Nurse routes */}
-                <Route path="/nurse" element={<NurseDashboard />} />
-                <Route path="/nurse/patients" element={<NursePatientsPage />} />
-                <Route path="/nurse/vitals" element={<VitalsPage />} />
-                <Route path="/nurse/medication" element={<MedicationPage />} />
-                <Route path="/nurse/tasks" element={<h1>Nurse Tasks Page</h1>} />
-                <Route path="/nurse/wards" element={<h1>Nurse Wards Page</h1>} />
-                <Route path="/nurse/alerts" element={<h1>Nurse Alerts Page</h1>} />
-                <Route path="/nurse/communication" element={<h1>Nurse Communication Page</h1>} />
-                
-                {/* Pharmacy routes */}
-                <Route path="/pharmacy" element={<PharmacistDashboard />} />
-                <Route path="/pharmacy/prescriptions" element={<PrescriptionsPage />} />
-                <Route path="/pharmacy/inventory" element={<InventoryPage />} />
-                <Route path="/pharmacy/dispensary" element={<DispensaryPage />} />
-                <Route path="/pharmacy/alerts" element={<AlertsPage />} />
-                <Route path="/pharmacy/sales" element={<h1>Pharmacy Sales Page</h1>} />
-                <Route path="/pharmacy/orders" element={<h1>Purchase Orders Page</h1>} />
-                <Route path="/pharmacy/reports" element={<h1>Pharmacy Reports Page</h1>} />
-                
-                {/* Cashier routes */}
-                <Route path="/cashier" element={<CashierDashboard />} />
-                <Route path="/cashier/reports" element={<ReportsPage />} />
-                <Route path="/cashier/reprint" element={<ReprintPage />} />
-                <Route path="/cashier/refunds" element={<RefundsPage />} />
-                
-                {/* Lab routes */}
-                <Route path="/lab" element={<LabDashboard />} />
-                <Route path="/lab/requests" element={<LabRequestsPage />} />
-                <Route path="/lab/results" element={<ResultsPage />} />
-                <Route path="/lab/results/pending" element={<PendingResultsPage />} />
-                <Route path="/lab/results/completed" element={<CompletedResultsPage />} />
-                <Route path="/lab/results/critical" element={<CriticalResultsPage />} />
-                <Route path="/lab/inventory" element={<LabInventoryPage />} />
-                <Route path="/lab/quality" element={<QualityControlPage />} />
-                <Route path="/lab/equipment" element={<EquipmentPage />} />
-                
-                {/* Health Record Management (EHR) routes */}
-                <Route path="/ehr" element={<EHRDashboard />} />
-                <Route path="/ehr/records" element={<PatientRecordsPage />} />
-                <Route path="/ehr/patients" element={<PatientManagementPage />} />
-                <Route path="/ehr/appointments" element={<EHRAppointmentsPage />} />
-                <Route path="/ehr/notes/progress" element={<ProgressNotesPage />} />
-                <Route path="/ehr/notes/soap" element={<SOAPNotesPage />} />
-                <Route path="/ehr/notes/discharge" element={<DischargeNotesPage />} />
-                <Route path="/ehr/lab-results" element={<LabResultsPage />} />
-                <Route path="/ehr/imaging" element={<ImagingPage />} />
-                <Route path="/ehr/medications" element={<MedicationsPage />} />
-                <Route path="/ehr/analytics/statistics" element={<PatientStatisticsPage />} />
-                <Route path="/ehr/analytics/disease" element={<DiseasePrevalencePage />} />
-                <Route path="/ehr/analytics/outcomes" element={<TreatmentOutcomesPage />} />
-                <Route path="/ehr/profile" element={<ProfilePage />} />
-                
-                {/* Billing routes */}
-                <Route path="/billing" element={<h1>Billing Page</h1>} />
-                <Route path="/payments" element={<h1>Payments Page</h1>} />
-                
-                {/* Admin routes */}
-                <Route path="/staff" element={<h1>Staff Management Page</h1>} />
-                <Route path="/staff/roles" element={<h1>Roles & Permissions Page</h1>} />
-                <Route path="/staff/schedule" element={<h1>Staff Schedule Page</h1>} />
-                <Route path="/reports" element={<h1>Reports Page</h1>} />
-                <Route path="/settings" element={<h1>Settings Page</h1>} />
-              </Route>
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
+  return <>{children}</>;
 };
+
+// Public Route Component (redirects if already authenticated)
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner fullScreen text="Loading..." />;
+  }
+
+  if (user) {
+    return <Navigate to={`/${user.role}`} replace />;
+  }
+
+  return <>{children}</>;
+};
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={
+        <PublicRoute>
+          <LoginPage />
+        </PublicRoute>
+      } />
+
+      {/* Protected Routes */}
+      <Route path="/" element={
+        <ProtectedRoute>
+          <AppLayout />
+        </ProtectedRoute>
+      }>
+        {/* Admin Routes */}
+        <Route path="admin" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Doctor Routes */}
+        <Route path="doctor" element={
+          <ProtectedRoute allowedRoles={['doctor']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Nurse Routes */}
+        <Route path="nurse" element={
+          <ProtectedRoute allowedRoles={['nurse']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Pharmacist Routes */}
+        <Route path="pharmacist" element={
+          <ProtectedRoute allowedRoles={['pharmacist']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Lab Tech Routes */}
+        <Route path="labtech" element={
+          <ProtectedRoute allowedRoles={['labtech']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Cashier Routes */}
+        <Route path="cashier" element={
+          <ProtectedRoute allowedRoles={['cashier']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+
+        {/* EHR Routes */}
+        <Route path="ehr" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/patient-records" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <PatientRecords />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/patient-management" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <PatientManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/appointments" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <Appointments />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/progress-notes" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <ProgressNotes />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/soap-notes" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <SOAPNotes />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/discharge-notes" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <DischargeNotes />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/lab-results" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <LabResults />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/imaging" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <Imaging />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/medications" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <Medications />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/analytics/statistics" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <PatientStatistics />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/analytics/disease-prevalence" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <DiseasePrevalence />
+          </ProtectedRoute>
+        } />
+        <Route path="ehr/analytics/treatment-outcomes" element={
+          <ProtectedRoute allowedRoles={['ehr']}>
+            <TreatmentOutcomes />
+          </ProtectedRoute>
+        } />
+
+        {/* Default redirect based on user role */}
+        <Route path="/" element={<Navigate to="/ehr" replace />} />
+      </Route>
+
+      {/* Catch all route */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-background">
+            <AppRoutes />
+            <Toaster 
+              position="top-right"
+              expand={true}
+              richColors
+              closeButton
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: 'hsl(var(--background))',
+                  color: 'hsl(var(--foreground))',
+                  border: '1px solid hsl(var(--border))',
+                },
+              }}
+            />
+          </div>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
+  );
+}
 
 export default App;
