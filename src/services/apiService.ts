@@ -1,604 +1,355 @@
-// API Service for ARCHMEDICS HMS
-// This service provides a centralized interface for all API communications
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
+// API Configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
-export interface Patient {
-  id: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  gender: 'male' | 'female' | 'other';
-  phone: string;
-  email: string;
-  address: string;
-  emergencyContact: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  insurance: {
-    provider: string;
-    policyNumber: string;
-    groupNumber?: string;
-  };
-  medicalHistory: string[];
-  allergies: string[];
-  currentMedications: string[];
-  status: 'active' | 'inactive' | 'discharged' | 'follow-up';
-  assignedDoctor: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// Create axios instance
+const apiClient: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-export interface Appointment {
-  id: string;
-  patientId: string;
-  doctorId: string;
-  date: string;
-  time: string;
-  duration: number; // in minutes
-  type: 'consultation' | 'follow-up' | 'emergency' | 'surgery' | 'therapy';
-  status: 'scheduled' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled' | 'no-show';
-  notes?: string;
-  symptoms?: string;
-  diagnosis?: string;
-  treatment?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface MedicalRecord {
-  id: string;
-  patientId: string;
-  providerId: string;
-  recordType: 'vital-signs' | 'lab-results' | 'imaging' | 'procedure' | 'medication' | 'note';
-  date: string;
-  title: string;
-  content: any; // Flexible content based on record type
-  attachments?: string[];
-  status: 'draft' | 'final' | 'amended' | 'cancelled';
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface VitalSigns {
-  id: string;
-  patientId: string;
-  recordedBy: string;
-  timestamp: string;
-  bloodPressure: {
-    systolic: number;
-    diastolic: number;
-  };
-  heartRate: number;
-  temperature: number;
-  respiratoryRate: number;
-  oxygenSaturation: number;
-  weight?: number;
-  height?: number;
-  bmi?: number;
-  notes?: string;
-}
-
-export interface LabResult {
-  id: string;
-  patientId: string;
-  orderedBy: string;
-  performedBy: string;
-  testType: string;
-  testName: string;
-  orderDate: string;
-  collectionDate: string;
-  resultDate: string;
-  status: 'ordered' | 'collected' | 'in-progress' | 'completed' | 'cancelled';
-  results: {
-    parameter: string;
-    value: string;
-    unit: string;
-    referenceRange: string;
-    flag?: 'high' | 'low' | 'critical' | 'normal';
-  }[];
-  interpretation?: string;
-  criticalValues?: boolean;
-  attachments?: string[];
-}
-
-export interface Prescription {
-  id: string;
-  patientId: string;
-  prescribedBy: string;
-  date: string;
-  medications: {
-    name: string;
-    dosage: string;
-    frequency: string;
-    duration: string;
-    instructions: string;
-    quantity: number;
-    refills: number;
-  }[];
-  status: 'active' | 'completed' | 'cancelled' | 'expired';
-  notes?: string;
-}
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'admin' | 'doctor' | 'nurse' | 'pharmacist' | 'labtech' | 'cashier' | 'ehr';
-  department?: string;
-  specialty?: string;
-  licenseNumber?: string;
-  phone: string;
-  isActive: boolean;
-  lastLogin?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-class ApiService {
-  private baseUrl: string;
-  private token: string | null = null;
-
-  constructor(baseUrl: string = process.env.REACT_APP_API_URL || 'http://localhost:3001/api') {
-    this.baseUrl = baseUrl;
-    this.token = localStorage.getItem('authToken');
-  }
-
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint}`;
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+// Request interceptor to add auth token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
+// Response interceptor to handle auth errors
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
 
-      const data = await response.json();
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-      if (!response.ok) {
-        return {
-          success: false,
-          error: data.message || `HTTP error! status: ${response.status}`,
-        };
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+            refreshToken,
+          });
+
+          const { token } = response.data;
+          localStorage.setItem('authToken', token);
+
+          // Retry original request with new token
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiClient(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh failed, redirect to login
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
       }
-
-      return {
-        success: true,
-        data: data.data || data,
-        message: data.message,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Network error occurred',
-      };
-    }
-  }
-
-  // Authentication methods
-  async login(email: string, password: string): Promise<ApiResponse<{ user: User; token: string }>> {
-    const response = await this.request<{ user: User; token: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (response.success && response.data) {
-      this.token = response.data.token;
-      localStorage.setItem('authToken', this.token);
     }
 
-    return response;
+    return Promise.reject(error);
+  }
+);
+
+// API Service Class
+export class ApiService {
+  // Authentication
+  static async login(email: string, password: string) {
+    const response = await apiClient.post('/auth/login', { email, password });
+    return response.data;
   }
 
-  async logout(): Promise<ApiResponse<void>> {
-    const response = await this.request<void>('/auth/logout', {
-      method: 'POST',
+  static async register(userData: any) {
+    const response = await apiClient.post('/auth/register', userData);
+    return response.data;
+  }
+
+  static async logout() {
+    const response = await apiClient.post('/auth/logout');
+    return response.data;
+  }
+
+  static async getProfile() {
+    const response = await apiClient.get('/auth/profile');
+    return response.data;
+  }
+
+  static async refreshToken(refreshToken: string) {
+    const response = await apiClient.post('/auth/refresh', { refreshToken });
+    return response.data;
+  }
+
+  // Users
+  static async getUsers(params?: any) {
+    const response = await apiClient.get('/users', { params });
+    return response.data;
+  }
+
+  static async getUser(id: string) {
+    const response = await apiClient.get(`/users/${id}`);
+    return response.data;
+  }
+
+  static async updateUser(id: string, userData: any) {
+    const response = await apiClient.put(`/users/${id}`, userData);
+    return response.data;
+  }
+
+  static async changePassword(id: string, passwordData: any) {
+    const response = await apiClient.put(`/users/${id}/password`, passwordData);
+    return response.data;
+  }
+
+  static async deactivateUser(id: string) {
+    const response = await apiClient.delete(`/users/${id}`);
+    return response.data;
+  }
+
+  static async getDoctors(params?: any) {
+    const response = await apiClient.get('/users/doctors/list', { params });
+    return response.data;
+  }
+
+  static async getUserStats() {
+    const response = await apiClient.get('/users/stats/overview');
+    return response.data;
+  }
+
+  // Patients
+  static async getPatients(params?: any) {
+    const response = await apiClient.get('/patients', { params });
+    return response.data;
+  }
+
+  static async getPatient(id: string) {
+    const response = await apiClient.get(`/patients/${id}`);
+    return response.data;
+  }
+
+  static async createPatient(patientData: any) {
+    const response = await apiClient.post('/patients', patientData);
+    return response.data;
+  }
+
+  static async updatePatient(id: string, patientData: any) {
+    const response = await apiClient.put(`/patients/${id}`, patientData);
+    return response.data;
+  }
+
+  static async deletePatient(id: string) {
+    const response = await apiClient.delete(`/patients/${id}`);
+    return response.data;
+  }
+
+  // Appointments
+  static async getAppointments(params?: any) {
+    const response = await apiClient.get('/appointments', { params });
+    return response.data;
+  }
+
+  static async getAppointment(id: string) {
+    const response = await apiClient.get(`/appointments/${id}`);
+    return response.data;
+  }
+
+  static async createAppointment(appointmentData: any) {
+    const response = await apiClient.post('/appointments', appointmentData);
+    return response.data;
+  }
+
+  static async updateAppointment(id: string, appointmentData: any) {
+    const response = await apiClient.put(`/appointments/${id}`, appointmentData);
+    return response.data;
+  }
+
+  static async cancelAppointment(id: string) {
+    const response = await apiClient.delete(`/appointments/${id}`);
+    return response.data;
+  }
+
+  static async getDoctorAvailability(doctorId: string, date: string) {
+    const response = await apiClient.get(`/appointments/availability/${doctorId}`, {
+      params: { date },
     });
-
-    this.token = null;
-    localStorage.removeItem('authToken');
-    return response;
+    return response.data;
   }
 
-  async refreshToken(): Promise<ApiResponse<{ token: string }>> {
-    const response = await this.request<{ token: string }>('/auth/refresh', {
-      method: 'POST',
+  // Medical Records
+  static async getMedicalRecords(params?: any) {
+    const response = await apiClient.get('/medical-records', { params });
+    return response.data;
+  }
+
+  static async getMedicalRecord(id: string) {
+    const response = await apiClient.get(`/medical-records/${id}`);
+    return response.data;
+  }
+
+  static async createMedicalRecord(recordData: any) {
+    const response = await apiClient.post('/medical-records', recordData);
+    return response.data;
+  }
+
+  static async updateMedicalRecord(id: string, recordData: any) {
+    const response = await apiClient.put(`/medical-records/${id}`, recordData);
+    return response.data;
+  }
+
+  static async deleteMedicalRecord(id: string) {
+    const response = await apiClient.delete(`/medical-records/${id}`);
+    return response.data;
+  }
+
+  static async getPatientMedicalHistory(patientId: string, params?: any) {
+    const response = await apiClient.get(`/medical-records/patient/${patientId}/history`, {
+      params,
     });
-
-    if (response.success && response.data) {
-      this.token = response.data.token;
-      localStorage.setItem('authToken', this.token);
-    }
-
-    return response;
+    return response.data;
   }
 
-  // Patient methods
-  async getPatients(params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    status?: string;
-    department?: string;
-  }): Promise<ApiResponse<{ patients: Patient[]; total: number; page: number; totalPages: number }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request<{ patients: Patient[]; total: number; page: number; totalPages: number }>(
-      `/patients?${queryParams.toString()}`
-    );
+  static async getMedicalRecordStats(params?: any) {
+    const response = await apiClient.get('/medical-records/stats/overview', { params });
+    return response.data;
   }
 
-  async getPatient(id: string): Promise<ApiResponse<Patient>> {
-    return this.request<Patient>(`/patients/${id}`);
+  // Vital Signs
+  static async getVitalSigns(params?: any) {
+    const response = await apiClient.get('/vital-signs', { params });
+    return response.data;
   }
 
-  async createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<Patient>> {
-    return this.request<Patient>('/patients', {
-      method: 'POST',
-      body: JSON.stringify(patient),
+  static async getVitalSign(id: string) {
+    const response = await apiClient.get(`/vital-signs/${id}`);
+    return response.data;
+  }
+
+  static async createVitalSigns(vitalData: any) {
+    const response = await apiClient.post('/vital-signs', vitalData);
+    return response.data;
+  }
+
+  static async updateVitalSigns(id: string, vitalData: any) {
+    const response = await apiClient.put(`/vital-signs/${id}`, vitalData);
+    return response.data;
+  }
+
+  static async deleteVitalSigns(id: string) {
+    const response = await apiClient.delete(`/vital-signs/${id}`);
+    return response.data;
+  }
+
+  static async getPatientVitalHistory(patientId: string, params?: any) {
+    const response = await apiClient.get(`/vital-signs/patient/${patientId}/history`, {
+      params,
     });
+    return response.data;
   }
 
-  async updatePatient(id: string, patient: Partial<Patient>): Promise<ApiResponse<Patient>> {
-    return this.request<Patient>(`/patients/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(patient),
+  static async getPatientVitalTrends(patientId: string, params?: any) {
+    const response = await apiClient.get(`/vital-signs/patient/${patientId}/trends`, {
+      params,
     });
+    return response.data;
   }
 
-  async deletePatient(id: string): Promise<ApiResponse<void>> {
-    return this.request<void>(`/patients/${id}`, {
-      method: 'DELETE',
+  // Lab Results
+  static async getLabResults(params?: any) {
+    const response = await apiClient.get('/lab-results', { params });
+    return response.data;
+  }
+
+  static async getLabResult(id: string) {
+    const response = await apiClient.get(`/lab-results/${id}`);
+    return response.data;
+  }
+
+  static async createLabOrder(labData: any) {
+    const response = await apiClient.post('/lab-results', labData);
+    return response.data;
+  }
+
+  static async updateLabResult(id: string, labData: any) {
+    const response = await apiClient.put(`/lab-results/${id}`, labData);
+    return response.data;
+  }
+
+  static async cancelLabOrder(id: string) {
+    const response = await apiClient.delete(`/lab-results/${id}`);
+    return response.data;
+  }
+
+  static async getPatientLabHistory(patientId: string, params?: any) {
+    const response = await apiClient.get(`/lab-results/patient/${patientId}/history`, {
+      params,
     });
+    return response.data;
   }
 
-  // Appointment methods
-  async getAppointments(params?: {
-    page?: number;
-    limit?: number;
-    date?: string;
-    doctorId?: string;
-    patientId?: string;
-    status?: string;
-  }): Promise<ApiResponse<{ appointments: Appointment[]; total: number; page: number; totalPages: number }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request<{ appointments: Appointment[]; total: number; page: number; totalPages: number }>(
-      `/appointments?${queryParams.toString()}`
-    );
+  static async getPendingLabOrders(params?: any) {
+    const response = await apiClient.get('/lab-results/pending/orders', { params });
+    return response.data;
   }
 
-  async getAppointment(id: string): Promise<ApiResponse<Appointment>> {
-    return this.request<Appointment>(`/appointments/${id}`);
+  // Prescriptions
+  static async getPrescriptions(params?: any) {
+    const response = await apiClient.get('/prescriptions', { params });
+    return response.data;
   }
 
-  async createAppointment(appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<Appointment>> {
-    return this.request<Appointment>('/appointments', {
-      method: 'POST',
-      body: JSON.stringify(appointment),
+  static async getPrescription(id: string) {
+    const response = await apiClient.get(`/prescriptions/${id}`);
+    return response.data;
+  }
+
+  static async createPrescription(prescriptionData: any) {
+    const response = await apiClient.post('/prescriptions', prescriptionData);
+    return response.data;
+  }
+
+  static async updatePrescription(id: string, prescriptionData: any) {
+    const response = await apiClient.put(`/prescriptions/${id}`, prescriptionData);
+    return response.data;
+  }
+
+  static async cancelPrescription(id: string) {
+    const response = await apiClient.delete(`/prescriptions/${id}`);
+    return response.data;
+  }
+
+  static async getPatientPrescriptionHistory(patientId: string, params?: any) {
+    const response = await apiClient.get(`/prescriptions/patient/${patientId}/history`, {
+      params,
     });
+    return response.data;
   }
 
-  async updateAppointment(id: string, appointment: Partial<Appointment>): Promise<ApiResponse<Appointment>> {
-    return this.request<Appointment>(`/appointments/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(appointment),
-    });
+  static async getActivePrescriptions(params?: any) {
+    const response = await apiClient.get('/prescriptions/active/pharmacy', { params });
+    return response.data;
   }
 
-  async cancelAppointment(id: string, reason?: string): Promise<ApiResponse<Appointment>> {
-    return this.request<Appointment>(`/appointments/${id}/cancel`, {
-      method: 'POST',
-      body: JSON.stringify({ reason }),
-    });
+  static async getPrescriptionStats(params?: any) {
+    const response = await apiClient.get('/prescriptions/stats/overview', { params });
+    return response.data;
   }
 
-  // Medical Records methods
-  async getMedicalRecords(patientId: string, params?: {
-    page?: number;
-    limit?: number;
-    recordType?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }): Promise<ApiResponse<{ records: MedicalRecord[]; total: number; page: number; totalPages: number }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request<{ records: MedicalRecord[]; total: number; page: number; totalPages: number }>(
-      `/patients/${patientId}/records?${queryParams.toString()}`
-    );
-  }
-
-  async createMedicalRecord(patientId: string, record: Omit<MedicalRecord, 'id' | 'patientId' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<MedicalRecord>> {
-    return this.request<MedicalRecord>(`/patients/${patientId}/records`, {
-      method: 'POST',
-      body: JSON.stringify(record),
-    });
-  }
-
-  async updateMedicalRecord(patientId: string, recordId: string, record: Partial<MedicalRecord>): Promise<ApiResponse<MedicalRecord>> {
-    return this.request<MedicalRecord>(`/patients/${patientId}/records/${recordId}`, {
-      method: 'PUT',
-      body: JSON.stringify(record),
-    });
-  }
-
-  // Vital Signs methods
-  async getVitalSigns(patientId: string, params?: {
-    page?: number;
-    limit?: number;
-    dateFrom?: string;
-    dateTo?: string;
-  }): Promise<ApiResponse<{ vitals: VitalSigns[]; total: number; page: number; totalPages: number }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request<{ vitals: VitalSigns[]; total: number; page: number; totalPages: number }>(
-      `/patients/${patientId}/vitals?${queryParams.toString()}`
-    );
-  }
-
-  async createVitalSigns(patientId: string, vitals: Omit<VitalSigns, 'id' | 'patientId'>): Promise<ApiResponse<VitalSigns>> {
-    return this.request<VitalSigns>(`/patients/${patientId}/vitals`, {
-      method: 'POST',
-      body: JSON.stringify(vitals),
-    });
-  }
-
-  // Lab Results methods
-  async getLabResults(patientId: string, params?: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    testType?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }): Promise<ApiResponse<{ results: LabResult[]; total: number; page: number; totalPages: number }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request<{ results: LabResult[]; total: number; page: number; totalPages: number }>(
-      `/patients/${patientId}/lab-results?${queryParams.toString()}`
-    );
-  }
-
-  async createLabOrder(patientId: string, order: Omit<LabResult, 'id' | 'patientId' | 'resultDate' | 'results' | 'status'>): Promise<ApiResponse<LabResult>> {
-    return this.request<LabResult>(`/patients/${patientId}/lab-orders`, {
-      method: 'POST',
-      body: JSON.stringify(order),
-    });
-  }
-
-  async updateLabResult(patientId: string, resultId: string, result: Partial<LabResult>): Promise<ApiResponse<LabResult>> {
-    return this.request<LabResult>(`/patients/${patientId}/lab-results/${resultId}`, {
-      method: 'PUT',
-      body: JSON.stringify(result),
-    });
-  }
-
-  // Prescription methods
-  async getPrescriptions(patientId: string, params?: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }): Promise<ApiResponse<{ prescriptions: Prescription[]; total: number; page: number; totalPages: number }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request<{ prescriptions: Prescription[]; total: number; page: number; totalPages: number }>(
-      `/patients/${patientId}/prescriptions?${queryParams.toString()}`
-    );
-  }
-
-  async createPrescription(patientId: string, prescription: Omit<Prescription, 'id' | 'patientId'>): Promise<ApiResponse<Prescription>> {
-    return this.request<Prescription>(`/patients/${patientId}/prescriptions`, {
-      method: 'POST',
-      body: JSON.stringify(prescription),
-    });
-  }
-
-  async updatePrescription(patientId: string, prescriptionId: string, prescription: Partial<Prescription>): Promise<ApiResponse<Prescription>> {
-    return this.request<Prescription>(`/patients/${patientId}/prescriptions/${prescriptionId}`, {
-      method: 'PUT',
-      body: JSON.stringify(prescription),
-    });
-  }
-
-  // User management methods
-  async getUsers(params?: {
-    page?: number;
-    limit?: number;
-    role?: string;
-    department?: string;
-    search?: string;
-  }): Promise<ApiResponse<{ users: User[]; total: number; page: number; totalPages: number }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request<{ users: User[]; total: number; page: number; totalPages: number }>(
-      `/users?${queryParams.toString()}`
-    );
-  }
-
-  async getUser(id: string): Promise<ApiResponse<User>> {
-    return this.request<User>(`/users/${id}`);
-  }
-
-  async createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<User>> {
-    return this.request<User>('/users', {
-      method: 'POST',
-      body: JSON.stringify(user),
-    });
-  }
-
-  async updateUser(id: string, user: Partial<User>): Promise<ApiResponse<User>> {
-    return this.request<User>(`/users/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(user),
-    });
-  }
-
-  async deactivateUser(id: string): Promise<ApiResponse<User>> {
-    return this.request<User>(`/users/${id}/deactivate`, {
-      method: 'POST',
-    });
-  }
-
-  // Analytics and reporting methods
-  async getDashboardStats(params?: {
-    dateFrom?: string;
-    dateTo?: string;
-    department?: string;
-  }): Promise<ApiResponse<{
-    totalPatients: number;
-    newPatients: number;
-    appointmentsToday: number;
-    criticalAlerts: number;
-    occupancyRate: number;
-    averageStayDuration: number;
-  }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request(`/analytics/dashboard?${queryParams.toString()}`);
-  }
-
-  async getPatientStatistics(params?: {
-    dateFrom?: string;
-    dateTo?: string;
-    department?: string;
-  }): Promise<ApiResponse<{
-    admissionTrends: { date: string; count: number }[];
-    ageDemographics: { ageGroup: string; count: number; percentage: number }[];
-    genderDistribution: { gender: string; count: number; percentage: number }[];
-    departmentDistribution: { department: string; count: number; percentage: number }[];
-  }>> {
-    const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    return this.request(`/analytics/patients?${queryParams.toString()}`);
-  }
-
-  // File upload methods
-  async uploadFile(file: File, type: 'patient-photo' | 'medical-document' | 'lab-result' | 'imaging'): Promise<ApiResponse<{ url: string; filename: string }>> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
-
-    const headers: HeadersInit = {};
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
-
-    try {
-      const response = await fetch(`${this.baseUrl}/upload`, {
-        method: 'POST',
-        headers,
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return {
-          success: false,
-          error: data.message || `HTTP error! status: ${response.status}`,
-        };
-      }
-
-      return {
-        success: true,
-        data: data.data || data,
-        message: data.message,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Upload failed',
-      };
-    }
+  // Health Check
+  static async healthCheck() {
+    const response = await apiClient.get('/health');
+    return response.data;
   }
 }
 
-// Create and export a singleton instance
-export const apiService = new ApiService();
-export default apiService;
-
+export default ApiService;
