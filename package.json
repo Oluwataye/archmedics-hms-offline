@@ -29,7 +29,6 @@
     "typescript": "^5.5.4",
     "vite": "^5.3.1",
     "esbuild": "^0.21.5",
-    "lovable-tagger": "^0.0.12",
     "@eslint/js": "^9.9.0",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0",
